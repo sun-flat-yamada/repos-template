@@ -1,0 +1,17 @@
+{
+  "PROJECT_NAME": "Modern Software Repository",
+  "PROJECT_SLUG": "modern-software-repo",
+  "PROJECT_DESCRIPTION": "High-quality, production-ready software repository template with AI-SDLC governance.",
+  "PROJECT_DESCRIPTION_JA": "高品質・プロダクションレディなAI協調開発（AI-SDLC）ガバナンス対応ソフトウェアリポジトリテンプレート。",
+  "REPOSITORY_OWNER": "@sun-flat-yamada (Youhei Yamada)",
+  "REPOSITORY_NAME": "modern-software-repo",
+  "REPOSITORY_URL": "https://github.com/sun-flat-yamada/modern-software-repo",
+  "AUTHOR_NAME": "@sun-flat-yamada (Youhei Yamada)",
+  "AUTHOR_GITHUB": "@sun-flat-yamada (Youhei Yamada)",
+  "AUTHOR_EMAIL": "51235130+sun-flat-yamada@users.noreply.github.com",
+  "BUY_ME_A_COFFEE_USERNAME": "sun.flat.yamada",
+  "PRIMARY_LANGUAGE": "python",
+  "PRIMARY_LANGUAGE_DISPLAY": "Python",
+  "LICENSE_TYPE": "MIT",
+  "CURRENT_YEAR": "2026"
+}

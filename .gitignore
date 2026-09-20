@@ -1,0 +1,195 @@
+# ==============================================================================
+# Comprehensive .gitignore for Modern Multi-Language Repositories (2026 Standard)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 🔒 CRITICAL: Secrets, Credentials & Privacy Protection (OWASP / Gitleaks / Zero-Leak)
+# ------------------------------------------------------------------------------
+# Environment files & Local Configs (NEVER commit tokens or secrets)
+.env
+.env.*
+!.env.example
+*.env
+.envrc
+
+# Private Keys, Certificates & Cryptographic Credentials
+*.pem
+*.key
+*.priv
+*.pkcs12
+*.p12
+*.pfx
+*.asc
+id_rsa
+id_rsa.pub
+id_ecdsa
+id_ecdsa.pub
+id_ed25519
+id_ed25519.pub
+*.crt
+*.cer
+*.der
+*.keystore
+*.jks
+*.token
+*.secret
+
+# Cloud Provider Credentials & API Secret Dumps
+credentials.json
+client_secret*.json
+service-account*.json
+service_account*.json
+.aws/
+.gcp/
+.azure/
+gcloud/
+*.ovpn
+
+# Developer Package & Registry Tokens
+.npmrc
+.pypirc
+.gem/credentials
+
+# ------------------------------------------------------------------------------
+# OS-Specific Files
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ------------------------------------------------------------------------------
+# IDEs & Editors
+# ------------------------------------------------------------------------------
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# ------------------------------------------------------------------------------
+# Python
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.ruff_cache/
+.mypy_cache/
+
+# ------------------------------------------------------------------------------
+# Node.js / TypeScript / JavaScript
+# ------------------------------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+lerna-debug.log*
+.next/
+out/
+.nuxt/
+.vuepress/dist
+.serverless/
+.fusebox/
+.dynamodb/
+
+# ------------------------------------------------------------------------------
+# Rust
+# ------------------------------------------------------------------------------
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# ------------------------------------------------------------------------------
+# Go
+# ------------------------------------------------------------------------------
+*.exe
+*.test
+*.prof
+*.out
+/bin/
+/pkg/
+
+# ------------------------------------------------------------------------------
+# Dart / Flutter
+# ------------------------------------------------------------------------------
+.dart_tool/
+.packages
+pubspec.lock
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# ------------------------------------------------------------------------------
+# C / C++ / CMake
+# ------------------------------------------------------------------------------
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Testing/
+Makefile
+compile_commands.json
+
+# ------------------------------------------------------------------------------
+# C# / .NET
+# ------------------------------------------------------------------------------
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+project.lock.json
+.vs/
+
+# ------------------------------------------------------------------------------
+# AI Agent Local Cache & Temporary Session Files
+# ------------------------------------------------------------------------------
+.claude/
+.gemini_local/
+.ai_cache/
+*.transcript.jsonl

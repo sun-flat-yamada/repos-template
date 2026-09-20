@@ -1,0 +1,33 @@
+# ==============================================================================
+# GitHub Repository Template - Configuration Parameters
+# ==============================================================================
+# Define parameter mappings for placeholders: {<UPPER_SNAKE_CASE>}
+# Run `python scripts/apply-template.py` to automatically substitute these across
+# the repository.
+# ==============================================================================
+
+# Project Metadata
+PROJECT_NAME: "Modern Software Repository"
+PROJECT_SLUG: "modern-software-repo"
+PROJECT_DESCRIPTION: "High-quality, production-ready software repository template with AI-SDLC governance."
+PROJECT_DESCRIPTION_JA: "高品質・プロダクションレディなAI協調開発（AI-SDLC）ガバナンス対応ソフトウェアリポジトリテンプレート。"
+
+# Repository & Maintainer Info
+REPOSITORY_OWNER: "sun-flat-yamada"
+REPOSITORY_NAME: "modern-software-repo"
+REPOSITORY_URL: "https://github.com/sun-flat-yamada/modern-software-repo"
+AUTHOR_NAME: "Youhei Yamada"
+AUTHOR_GITHUB: "sun-flat-yamada"
+AUTHOR_EMAIL: "yamada.developer@example.com"
+
+# Sponsorship & Badges
+BUY_ME_A_COFFEE_USERNAME: "sun.flat.yamada"
+
+# Technical Stack
+# Options: c, cpp, csharp, typescript, javascript, dart, go, rust, python (or polyglot)
+PRIMARY_LANGUAGE: "python"
+PRIMARY_LANGUAGE_DISPLAY: "Python"
+
+# Licensing & Copyright
+LICENSE_TYPE: "MIT"
+CURRENT_YEAR: "2026"

@@ -1,0 +1,38 @@
+name: "CI Pipeline"
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: "Validate Codebase & Automation"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Syntax & Compilation Check
+        run: |
+          python -m py_compile scripts/apply-template.py scripts/install-hooks.py scripts/validate-filenames.py
+
+      - name: File Naming Convention Check
+        run: |
+          python scripts/validate-filenames.py
+
+      - name: Template Engine Verification
+        run: |
+          python scripts/apply-template.py --help
+          python scripts/apply-template.py --dry-run

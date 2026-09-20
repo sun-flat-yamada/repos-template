@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# .githooks/commit-msg
+# ==============================================================================
+# Validates that commit messages follow the Conventional Commits specification.
+# Format: <type>(<optional-scope>): <description>
+# ==============================================================================
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(head -n 1 "$COMMIT_MSG_FILE")
+
+# Allow merge commits and squash commits
+if [[ "$COMMIT_MSG" =~ ^Merge ]]; then
+    exit 0
+fi
+
+# Conventional Commits regex pattern
+PATTERN="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9_\.-]+\))?!?: .+$"
+
+if ! [[ "$COMMIT_MSG" =~ $PATTERN ]]; then
+    echo "❌ [ERROR] Invalid commit message format." >&2
+    echo "Current message: \"$COMMIT_MSG\"" >&2
+    echo "" >&2
+    echo "Please adhere to the Conventional Commits specification:" >&2
+    echo "  <type>(<scope>): <subject>" >&2
+    echo "" >&2
+    echo "Valid types:" >&2
+    echo "  feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert" >&2
+    echo "" >&2
+    echo "Example:" >&2
+    echo "  feat(auth): implement JWT token verification" >&2
+    echo "  fix: resolve race condition in cache eviction" >&2
+    exit 1
+fi
+
+exit 0

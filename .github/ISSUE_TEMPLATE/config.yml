@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "🔒 Security Vulnerability Reporting"
+    url: "https://github.com/{REPOSITORY_OWNER}/{REPOSITORY_NAME}/security/policy"
+    about: "Report security vulnerabilities responsibly via private advisory channels."
+  - name: "💬 General Discussions & Questions"
+    url: "https://github.com/{REPOSITORY_OWNER}/{REPOSITORY_NAME}/discussions"
+    about: "Ask questions, share ideas, and connect with the maintainers."

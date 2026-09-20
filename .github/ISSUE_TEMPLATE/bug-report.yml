@@ -1,0 +1,46 @@
+name: "🐛 Bug Report"
+description: "File an actionable bug report to help us improve."
+title: "fix: [Short bug description]"
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue! Please do not report security vulnerabilities here; use [SECURITY.md](https://github.com/{REPOSITORY_OWNER}/{REPOSITORY_NAME}/security/policy) instead.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Bug Description
+      description: Clear and concise description of what the bug is.
+      placeholder: "A clear description of what went wrong..."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Exact steps to reproduce the issue.
+      placeholder: |
+        1. Run command '...'
+        2. Set config '...'
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment & Versions
+      description: OS, Language version, tools installed.
+      value: |
+        - OS: [e.g. Windows 11 / Ubuntu 24.04 / macOS Sequoia]
+        - Language/Runtime: [e.g. Python 3.12, Node 22, Rust 1.80]
+        - Version: [e.g. 1.0.0]
+    validations:
+      required: false

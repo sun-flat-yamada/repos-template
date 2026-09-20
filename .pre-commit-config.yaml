@@ -1,0 +1,41 @@
+# ==============================================================================
+# pre-commit configuration (2026 Standard)
+# ==============================================================================
+# Install hooks via: pre-commit install
+# Run manually:      pre-commit run --all-files
+# ==============================================================================
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: ['--allow-multiple-documents']
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=5000']
+      - id: check-merge-conflict
+
+  # 🔒 Zero-Leak Secret Protection via Gitleaks
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
+
+  # Local Repository Template Validation Hook
+  - repo: local
+    hooks:
+      - id: template-placeholder-check
+        name: check-unresolved-placeholders
+        entry: python scripts/apply-template.py --check
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: validate-filenames
+        name: validate-file-naming-conventions
+        entry: python scripts/validate-filenames.py --staged
+        language: system
+        pass_filenames: false
+        always_run: true

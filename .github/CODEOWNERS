@@ -1,0 +1,11 @@
+# ==============================================================================
+# GitHub CODEOWNERS
+# ==============================================================================
+# Global default owner
+* @{AUTHOR_GITHUB}
+
+# Critical Security & Governance Files
+/SECURITY.md @{AUTHOR_GITHUB}
+/.github/workflows/ @{AUTHOR_GITHUB}
+/.agents/ @{AUTHOR_GITHUB}
+/docs/adr/ @{AUTHOR_GITHUB}

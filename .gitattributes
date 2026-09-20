@@ -1,0 +1,52 @@
+# ==============================================================================
+# Git Attributes - Line Endings & Language Identification
+# ==============================================================================
+
+# Auto-detect text files and normalize line endings to LF on checkout/commit
+* text=auto eol=lf
+
+# Explicit Text Formats
+*.md text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.xml text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+
+# Source Code
+*.py text diff=python eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.dart text eol=lf
+*.go text eol=lf
+*.rs text diff=rust eol=lf
+*.c text diff=cpp eol=lf
+*.h text diff=cpp eol=lf
+*.cpp text diff=cpp eol=lf
+*.hpp text diff=cpp eol=lf
+*.cs text diff=csharp eol=lf
+*.sh text eol=lf
+*.bash text eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary Files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.so binary
+*.dll binary
+*.dylib binary
+*.exe binary
+*.bin binary
+*.zip binary
+*.tar.gz binary

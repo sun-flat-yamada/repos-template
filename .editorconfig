@@ -1,0 +1,37 @@
+# ==============================================================================
+# EditorConfig - Cross-Editor Formatting Standardization
+# ==============================================================================
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Python (PEP 8)
+[*.py]
+indent_size = 4
+
+# Go
+[*.go]
+indent_style = tab
+indent_size = 4
+
+# Rust
+[*.rs]
+indent_size = 4
+
+# C / C++ / C#
+[*.{c,cpp,h,hpp,cs}]
+indent_size = 4
+
+# Markdown (preserve trailing spaces for line breaks if needed, but standardize)
+[*.md]
+trim_trailing_whitespace = false
+
+# Windows Scripts
+[*.{bat,cmd,ps1}]
+end_of_line = crlf

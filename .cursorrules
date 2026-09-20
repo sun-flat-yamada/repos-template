@@ -1,0 +1,8 @@
+# Cursor & Windsurf Rules for {PROJECT_NAME}
+
+- Adhere to Clean Architecture and isolation principles outlined in `docs/architecture/overview.md`.
+- Never commit or print real secrets, private keys, or credentials.
+- Commit messages must follow Conventional Commits (`feat:`, `fix:`, `refactor:`, `docs:`, `test:`).
+- Always include automated unit tests alongside code changes.
+- Refer to `.agents/rules/coding-rules-general.md` and `.agents/rules/languages/coding-rules-{PRIMARY_LANGUAGE}.md`.
+- File naming must strictly follow `.agents/rules/naming-rules-general.md` (agent definitions must end with `*.agent.md`, prefix `agent-` is strictly prohibited).

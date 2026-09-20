@@ -1,0 +1,23 @@
+name: "Template Placeholder Check"
+
+on:
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  check-placeholders:
+    name: "Scan Unresolved Placeholders"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run Placeholder Scan
+        run: |
+          # If template.config.yaml exists and is still un-finalized, run check to report
+          python scripts/apply-template.py --check || echo "::warning::Unresolved template placeholders detected. Run 'python scripts/apply-template.py' to substitute values."
