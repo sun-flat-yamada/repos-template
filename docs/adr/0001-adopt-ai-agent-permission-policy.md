@@ -47,3 +47,21 @@ Industry guidance converges on least agency (OWASP LLM06:2025, OWASP Agentic Top
 - More approval prompts for pushes, dependency changes, and network commands, especially where no sandbox is available (native Windows).
 - Tool limitations force stricter-than-policy behavior in places (Cursor CLI has no ask list; Codex network access is all-or-nothing; Gemini CLI ignores workspace policies, so its policy must be copied to the user tier).
 - Pattern rules and the guard hook are heuristics, not a security boundary; they must be maintained as tools evolve, and false positives (for example, commands that mention `.env`) are resolved in favor of denial.
+
+## Addendum (2026-10-01): Claude Code auto mode and the unsandboxed retry
+
+### Decision
+
+The shared `.claude/settings.json` sets neither `permissions.disableAutoMode` nor `sandbox.allowUnsandboxedCommands`.
+
+### Rationale
+
+- In auto mode, a classifier reviews actions instead of a human, but explicit `ask` rules and PreToolUse hook `ask` decisions still prompt a human. Deny rules and the guard's `deny` decisions block in every mode ([Claude Code permission modes](https://code.claude.com/docs/en/permission-modes)). Every C-HITL action in the policy is an explicit `ask` rule or a guard decision, so auto mode does not remove those approvals.
+- An unsandboxed retry already prompts in every mode through the existing `Bash(dangerouslyDisableSandbox:true)` ask rule ([Claude Code sandboxing](https://code.claude.com/docs/en/sandboxing)), which meets the C-SBX requirement. Setting `allowUnsandboxedCommands` to `false` would also block, even with human approval, tools that cannot run sandboxed (for example Docker and some git operations).
+- Auto mode is the default starting mode in current Claude Code releases. Disabling it in a shared project file would override each developer's choice. An organization that needs it disabled can set `disableAutoMode` in managed settings, which project files cannot override.
+
+### Consequences
+
+- This deviates from Decision 2. In auto mode, an action that matches no rule is reviewed by the classifier, not by a human. The classifier blocks actions that go beyond the request or that are driven by hostile content, but it is not a human approval. Mitigation: express every new high-impact command as an `ask` rule or a guard check instead of relying on the classifier.
+- A team that requires every unlisted action to go to a human sets `disableAutoMode` to `"disable"` in managed settings or in `.claude/settings.local.json`.
+- Revisit this decision if Claude Code changes how `ask` rules or hook decisions behave in auto mode, or if the classifier is found approving a C-HITL action.
