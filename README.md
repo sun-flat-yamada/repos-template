@@ -1,6 +1,4 @@
 ---
-$schema: ".aegis/schemas/frontmatter.schema.json"
-doc_type: "guide"
 id: "{PROJECT_SLUG}-README-EN"
 title: "{PROJECT_NAME} - Official Documentation"
 description: "{PROJECT_DESCRIPTION} Official repository documentation and comprehensive architecture guide for developers and AI agents."
@@ -8,7 +6,7 @@ category: "overview"
 type: "guide"
 version: "1.0.0"
 status: "active"
-language: "en"
+lang: "en"
 canonical_ref: "README.ja.md"
 compatibility:
   tools: ["google-antigravity", "claude-code", "github-copilot", "gemini-cli"]

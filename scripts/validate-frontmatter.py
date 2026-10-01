@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 try:
     import yaml
@@ -20,8 +20,28 @@ except ImportError:
     print("Error: 'yaml' module not found. Please install PyYAML to run this validator.")
     sys.exit(1)
 
+# Files whose format is owned by GitHub or by an AI tool: front matter is
+# optional because it would be shown verbatim (for example in every pull
+# request body). When present, it is still validated.
+FRONTMATTER_OPTIONAL = frozenset({
+    ".github/PULL_REQUEST_TEMPLATE.md",
+    ".github/copilot-instructions.md",
+    ".gemini/GEMINI.md",
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "CLAUDE.md",
+    "CODE_OF_CONDUCT.md",
+    "GEMINI.md",
+    "README.ja.md",
+    "README.md",
+})
 
-def validate_markdown_frontmatter(file_path: Path) -> List[str]:
+
+def frontmatter_required(rel_path: Path) -> bool:
+    return rel_path.as_posix() not in FRONTMATTER_OPTIONAL
+
+
+def validate_markdown_frontmatter(file_path: Path, rel_path: Optional[Path] = None) -> List[str]:
     errors: List[str] = []
     try:
         content = file_path.read_text(encoding="utf-8")
@@ -29,6 +49,8 @@ def validate_markdown_frontmatter(file_path: Path) -> List[str]:
         return [f"Failed to read file: {e}"]
 
     if not content.startswith("---"):
+        if not frontmatter_required(rel_path or file_path):
+            return []
         return ["Missing front-matter opening delimiter ('---')"]
 
     parts = content.split("---", 2)
