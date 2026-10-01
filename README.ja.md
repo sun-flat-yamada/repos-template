@@ -1,6 +1,4 @@
 ---
-$schema: ".aegis/schemas/frontmatter.schema.json"
-doc_type: "guide"
 id: "{PROJECT_SLUG}-README-JA"
 title: "{PROJECT_NAME} - 日本語公式ドキュメント"
 description: "{PROJECT_DESCRIPTION_JA}。エンタープライズ品質の堅牢性、マルチAIエージェント協調、および最新開発標準を統合した公式リポジトリドキュメント。"
@@ -8,7 +6,7 @@ category: "overview"
 type: "guide"
 version: "1.0.0"
 status: "active"
-language: "ja"
+lang: "ja"
 canonical_ref: "README.md"
 compatibility:
   tools: ["google-antigravity", "claude-code", "github-copilot", "gemini-cli"]

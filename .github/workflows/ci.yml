@@ -25,11 +25,17 @@ jobs:
 
       - name: Syntax & Compilation Check
         run: |
-          python -m py_compile scripts/apply-template.py scripts/install-hooks.py scripts/validate-filenames.py .claude/hooks/permission-guard.py
+          python -m py_compile scripts/apply-template.py scripts/install-hooks.py scripts/validate-filenames.py scripts/validate-frontmatter.py .claude/hooks/permission-guard.py
 
       - name: AI Permission Policy Tests
         run: |
           python tests/test-permission-guard.py -v
+
+      - name: Front Matter Validation
+        run: |
+          python -m pip install --disable-pip-version-check "PyYAML==6.0.2"
+          python scripts/validate-frontmatter.py
+          python tests/test-validate-frontmatter.py -v
 
       - name: File Naming Convention Check
         run: |

@@ -1,19 +1,3 @@
----
-title: "Pull Request Template"
-description: "Standard pull request template outlining change categories, test verification checklists, and security sign-offs."
-category: "meta"
-type: "template"
-status: "active"
-date: 2026-09-20
-updated: 2026-09-21
-lang: "en"
-tags:
-  - "github"
-  - "pull-request"
-  - "template"
-  - "verification"
----
-
 ## 📝 Description
 <!-- A clear and concise description of what this PR does and why it is needed. -->
 

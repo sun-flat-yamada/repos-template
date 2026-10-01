@@ -6,7 +6,7 @@ category: rules
 type: specification
 status: active
 date: 2026-09-20
-updated: 2026-09-21
+updated: 2026-10-01
 lang: en
 tags:
 - rules
@@ -42,6 +42,7 @@ Documentation is a first-class citizen of this repository.
 
 ## 5. Front-Matter Metadata Standards
 - All markdown documentation (`*.md`) across root and `docs/` must include a valid YAML front-matter block.
+- Exception: files whose format GitHub or an AI tool owns may omit front matter, because it would be shown or loaded verbatim (for example in every pull request body). The list is `FRONTMATTER_OPTIONAL` in `scripts/validate-frontmatter.py`: the pull request template, `README.md`, `README.ja.md`, `CHANGELOG.md`, `CODE_OF_CONDUCT.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.gemini/GEMINI.md`, and `.github/copilot-instructions.md`. Front matter in these files is still validated when present.
 - Front-matter must strictly adhere to the guidelines specified in `docs/guides/front-matter-standards.md`.
 - Required fields include `title` and a high-density, informative `description` for human clarity and AI/RAG indexing.
 - Ensure all dates use ISO 8601 (`YYYY-MM-DD`) and strings with colons are enclosed in double quotes.
