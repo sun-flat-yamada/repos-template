@@ -68,6 +68,7 @@ When developing with AI assistants (Google Antigravity, Claude Code, GitHub Copi
 - **Never bypass review**: AI-generated code must be reviewed and tested by a human before opening a PR.
 - **Context Hierarchy**: Always respect enterprise governance and repository rules (`.agents/rules/`) over prompt suggestions.
 - **Zero Secrets**: Do not allow AI tools to generate hardcoded mock keys, internal URLs, or real tokens.
+- **Permission Tiers**: Keep the shared AI permission configurations enabled and follow `.agents/rules/permission-rules-general.md`. Personal relaxations belong in untracked local files (for example `.claude/settings.local.json`), never in the shared configuration.
 
 ---
 

@@ -1,0 +1,15 @@
+{
+  "general": {
+    "defaultApprovalMode": "default"
+  },
+  "security": {
+    "disableYoloMode": true,
+    "enablePermanentToolApproval": false,
+    "environmentVariableRedaction": {
+      "enabled": true
+    }
+  },
+  "advanced": {
+    "ignoreLocalEnv": true
+  }
+}

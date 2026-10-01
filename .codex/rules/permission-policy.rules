@@ -1,0 +1,441 @@
+# ==============================================================================
+# .codex/rules/permission-policy.rules
+# ==============================================================================
+# Codex CLI execution policy for .agents/rules/permission-rules-general.md.
+# Loaded from <repo>/.codex/rules/ only after the project is trusted.
+#
+# Decisions: "forbidden" = tier N (never), "prompt" = tier C-HITL (approval).
+# When several rules match, Codex applies the strictest: forbidden > prompt > allow.
+# "allow" is intentionally unused: in Codex it runs a command OUTSIDE the
+# sandbox without asking, while tier A and C-SBX commands should stay inside
+# the workspace-write sandbox configured in .codex/config.toml.
+#
+# Prefix rules match argv tokens from the start, so flags in other positions
+# are not matched; the sandbox (network off, workspace-only writes) is the
+# backstop. Verify with:
+#   codex execpolicy check --rules .codex/rules/permission-policy.rules git push --force
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Tier N — never allowed
+# ------------------------------------------------------------------------------
+prefix_rule(
+    pattern = [["sudo", "su", "doas", "pkexec"]],
+    decision = "forbidden",
+    justification = "N-03: privilege escalation is never allowed. Ask a human to run it.",
+    match = ["sudo ls", "su -c whoami", "doas make install"],
+    not_match = ["sort file.txt"],
+)
+
+prefix_rule(
+    pattern = [["crontab", "launchctl"]],
+    decision = "forbidden",
+    justification = "N-03: installing persistence on the host is never allowed.",
+    match = ["crontab -e", "launchctl load agent.plist"],
+)
+
+prefix_rule(
+    pattern = ["git", "push", ["--force", "-f", "--force-with-lease", "--force-if-includes", "--mirror", "--delete", "-d", "--prune"]],
+    decision = "forbidden",
+    justification = "N-05: force push and remote ref deletion are never allowed. Push a new commit instead.",
+    match = ["git push --force", "git push -f origin feat/x", "git push --delete origin feat/old"],
+    not_match = ["git push origin feat/x"],
+)
+
+prefix_rule(
+    pattern = ["git", "push", ["origin", "upstream"], ["main", "master", "trunk", "production", "HEAD:main", "HEAD:master"]],
+    decision = "forbidden",
+    justification = "N-08: pushing directly to a protected branch is never allowed. Open a pull request.",
+    match = ["git push origin main", "git push upstream HEAD:master"],
+    not_match = ["git push origin feat/x"],
+)
+
+prefix_rule(
+    pattern = ["git", ["commit", "push", "merge", "rebase"], "--no-verify"],
+    decision = "forbidden",
+    justification = "N-04: bypassing git hooks is never allowed.",
+    match = ["git commit --no-verify -m wip", "git push --no-verify"],
+)
+
+prefix_rule(
+    pattern = ["git", "commit", "-n"],
+    decision = "forbidden",
+    justification = "N-04: `git commit -n` skips hooks and is never allowed.",
+    match = ["git commit -n -m wip"],
+    not_match = ["git commit -m wip"],
+)
+
+prefix_rule(
+    pattern = [["claude", "gemini", "codex", "copilot", "cursor-agent", "q"], ["--dangerously-skip-permissions", "--dangerously-bypass-approvals-and-sandbox", "--yolo", "--trust-all-tools", "--allow-all-tools", "--force"]],
+    decision = "forbidden",
+    justification = "N-04: running an agent with approvals or sandbox disabled is never allowed.",
+    match = ["claude --dangerously-skip-permissions", "gemini --yolo", "codex --dangerously-bypass-approvals-and-sandbox"],
+    not_match = ["gemini --version"],
+)
+
+prefix_rule(
+    pattern = ["rm", ["-rf", "-fr", "-Rf", "-rF", "-r", "-R"], ["/", "/*", "~", "~/", "~/*", "$HOME", ".", "./", "..", "*"]],
+    decision = "forbidden",
+    justification = "N-05: recursive deletion of root, home, or workspace paths is never allowed.",
+    match = ["rm -rf /", "rm -rf ~", "rm -fr ."],
+    not_match = ["rm -rf build"],
+)
+
+prefix_rule(
+    pattern = [["mkfs", "mkfs.ext4", "mkfs.xfs", "mkfs.vfat", "mkfs.fat", "fdisk", "sfdisk", "parted", "wipefs", "shutdown", "reboot", "halt", "poweroff"]],
+    decision = "forbidden",
+    justification = "N-05: irreversible disk and power operations are never allowed.",
+    match = ["mkfs.ext4 /dev/sda1", "reboot"],
+)
+
+prefix_rule(
+    pattern = [["cat", "less", "more", "head", "tail", "cp", "base64", "xxd", "source"], [".env", ".env.local", ".env.production", ".env.development", "~/.aws/credentials", "~/.ssh/id_rsa", "~/.ssh/id_ed25519", "~/.git-credentials", "~/.netrc", "~/.npmrc", "~/.pypirc", "~/.docker/config.json", "~/.kube/config"]],
+    decision = "forbidden",
+    justification = "N-01: reading or copying secret files is never allowed. Use .env.example placeholders.",
+    match = ["cat .env", "cp ~/.ssh/id_rsa /tmp/key"],
+    not_match = ["cat .env.example"],
+)
+
+prefix_rule(
+    pattern = ["gh", "auth", "token"],
+    decision = "forbidden",
+    justification = "N-01: printing credentials is never allowed.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "auth", ["print-access-token", "print-identity-token"]],
+    decision = "forbidden",
+    justification = "N-01: printing credentials is never allowed.",
+)
+
+prefix_rule(
+    pattern = ["aws", ["secretsmanager", "configure"], ["get-secret-value", "get", "export-credentials"]],
+    decision = "forbidden",
+    justification = "N-01: reading secrets from secret managers is never allowed.",
+    match = ["aws secretsmanager get-secret-value --secret-id x"],
+)
+
+prefix_rule(
+    pattern = ["kubectl", "get", ["secret", "secrets"]],
+    decision = "forbidden",
+    justification = "N-01: reading Kubernetes secrets is never allowed.",
+)
+
+prefix_rule(
+    pattern = ["gh", ["pr"], ["merge"]],
+    decision = "forbidden",
+    justification = "N-08: merging pull requests is a human decision.",
+    match = ["gh pr merge 12 --squash"],
+)
+
+prefix_rule(
+    pattern = ["gh", ["gist", "secret", "variable"]],
+    decision = "forbidden",
+    justification = "N-07/N-09: gists and repository secrets are never managed by an agent.",
+    match = ["gh gist create notes.txt", "gh secret set TOKEN"],
+)
+
+prefix_rule(
+    pattern = ["gh", "repo", "delete"],
+    decision = "forbidden",
+    justification = "N-07: deleting repositories is never allowed.",
+)
+
+prefix_rule(
+    pattern = ["gh", "release", ["create", "upload", "delete", "edit"]],
+    decision = "forbidden",
+    justification = "N-10: releases are published by CI, never by an agent.",
+)
+
+prefix_rule(
+    pattern = ["npm", ["publish", "unpublish", "deprecate", "dist-tag", "owner", "token", "adduser", "login"]],
+    decision = "forbidden",
+    justification = "N-10: publishing and registry credential management are done by CI.",
+    match = ["npm publish", "npm token create"],
+    not_match = ["npm test"],
+)
+
+prefix_rule(
+    pattern = [["pnpm", "bun", "uv", "poetry"], "publish"],
+    decision = "forbidden",
+    justification = "N-10: publishing packages is done by CI.",
+)
+
+prefix_rule(
+    pattern = ["yarn", "publish"],
+    decision = "forbidden",
+    justification = "N-10: publishing packages is done by CI.",
+    match = ["yarn publish"],
+)
+
+prefix_rule(
+    pattern = ["yarn", "npm", ["publish", "login"]],
+    decision = "forbidden",
+    justification = "N-10: publishing packages is done by CI.",
+    match = ["yarn npm publish"],
+)
+
+prefix_rule(
+    pattern = [["twine"], ["upload"]],
+    decision = "forbidden",
+    justification = "N-10: publishing packages is done by CI.",
+)
+
+prefix_rule(
+    pattern = ["cargo", ["publish", "yank", "owner", "login"]],
+    decision = "forbidden",
+    justification = "N-10: publishing crates is done by CI.",
+)
+
+prefix_rule(
+    pattern = ["dotnet", "nuget", ["push", "delete"]],
+    decision = "forbidden",
+    justification = "N-10: publishing NuGet packages is done by CI.",
+)
+
+prefix_rule(
+    pattern = [["dart", "flutter"], "pub", "publish"],
+    decision = "forbidden",
+    justification = "N-10: publishing pub packages is done by CI.",
+)
+
+prefix_rule(
+    pattern = [["gem"], ["push", "yank", "owner"]],
+    decision = "forbidden",
+    justification = "N-10: publishing gems is done by CI.",
+)
+
+prefix_rule(
+    pattern = [["docker", "podman"], ["push", "login"]],
+    decision = "forbidden",
+    justification = "N-10: pushing images and registry logins are done by CI.",
+)
+
+prefix_rule(
+    pattern = [["docker", "podman"], "run", ["--privileged", "--pid=host", "--net=host", "--network=host"]],
+    decision = "forbidden",
+    justification = "N-11: privileged containers and host namespaces are never allowed.",
+)
+
+prefix_rule(
+    pattern = [["terraform", "tofu", "terragrunt", "pulumi", "cdk"], "destroy"],
+    decision = "forbidden",
+    justification = "N-07: destroying infrastructure is never allowed.",
+    match = ["terraform destroy", "cdk destroy"],
+)
+
+prefix_rule(
+    pattern = [["terraform", "tofu"], "apply", ["-auto-approve", "--auto-approve"]],
+    decision = "forbidden",
+    justification = "N-07: infrastructure changes require a human-reviewed plan.",
+)
+
+prefix_rule(
+    pattern = ["kubectl", "delete", ["namespace", "namespaces", "ns"]],
+    decision = "forbidden",
+    justification = "N-07: deleting namespaces is never allowed.",
+)
+
+prefix_rule(
+    pattern = ["aws", "s3", "rb"],
+    decision = "forbidden",
+    justification = "N-07: deleting buckets is never allowed.",
+)
+
+prefix_rule(
+    pattern = [["gcloud"], ["projects"], ["delete"]],
+    decision = "forbidden",
+    justification = "N-07: deleting cloud projects is never allowed.",
+)
+
+prefix_rule(
+    pattern = ["az", "group", "delete"],
+    decision = "forbidden",
+    justification = "N-07: deleting resource groups is never allowed.",
+)
+
+prefix_rule(
+    pattern = [["dropdb"]],
+    decision = "forbidden",
+    justification = "N-07: dropping databases is never allowed.",
+)
+
+prefix_rule(
+    pattern = [["ngrok", "localtunnel", "lt", "bore"]],
+    decision = "forbidden",
+    justification = "N-09: tunnels that expose local services are never allowed.",
+)
+
+prefix_rule(
+    pattern = ["cloudflared", "tunnel"],
+    decision = "forbidden",
+    justification = "N-09: tunnels that expose local services are never allowed.",
+)
+
+prefix_rule(
+    pattern = ["ssh", "-R"],
+    decision = "forbidden",
+    justification = "N-09: reverse tunnels are never allowed.",
+)
+
+# ------------------------------------------------------------------------------
+# Tier C-HITL — human approval for every invocation
+# ------------------------------------------------------------------------------
+prefix_rule(
+    pattern = ["git", ["push", "clone", "filter-branch", "filter-repo"]],
+    decision = "prompt",
+    justification = "C-HITL-01/03: outward or history-rewriting git operations need approval.",
+    match = ["git push -u origin feat/x", "git clone https://example.com/repo.git"],
+    not_match = ["git status"],
+)
+
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "prompt",
+    justification = "C-HITL-03: discarding work needs approval.",
+)
+
+prefix_rule(
+    pattern = ["git", ["clean", "restore"]],
+    decision = "prompt",
+    justification = "C-HITL-03: discarding work needs approval.",
+)
+
+prefix_rule(
+    pattern = ["git", "branch", ["-D", "--delete"]],
+    decision = "prompt",
+    justification = "C-HITL-03: deleting branches needs approval.",
+)
+
+prefix_rule(
+    pattern = ["git", "stash", ["drop", "clear"]],
+    decision = "prompt",
+    justification = "C-HITL-03: discarding stashes needs approval.",
+)
+
+prefix_rule(
+    pattern = ["git", ["remote", "submodule"], ["add", "set-url"]],
+    decision = "prompt",
+    justification = "C-HITL-01: changing remotes or adding submodules needs approval.",
+)
+
+prefix_rule(
+    pattern = ["git", "config", ["--global", "--system"]],
+    decision = "prompt",
+    justification = "C-HITL-05: changing global git configuration needs approval.",
+)
+
+prefix_rule(
+    pattern = [["gh"]],
+    decision = "prompt",
+    justification = "C-HITL-01: GitHub CLI actions reach outside the workspace and need approval.",
+    match = ["gh pr create --fill", "gh api repos/x/y"],
+)
+
+prefix_rule(
+    pattern = ["rm", ["-r", "-rf", "-fr", "-R", "-Rf", "-rF", "--recursive"]],
+    decision = "prompt",
+    justification = "C-HITL-03: recursive deletion needs approval.",
+    match = ["rm -rf build"],
+    not_match = ["rm file.txt"],
+)
+
+prefix_rule(
+    pattern = [["kill", "pkill", "killall"]],
+    decision = "prompt",
+    justification = "C-HITL-03: killing processes needs approval.",
+)
+
+prefix_rule(
+    pattern = ["npm", ["install", "i", "add", "update", "uninstall", "remove", "exec", "audit"]],
+    decision = "prompt",
+    justification = "C-HITL-02: dependency changes need approval. Use `npm ci` for lockfile installs.",
+    match = ["npm install lodash", "npm i"],
+    not_match = ["npm ci", "npm test"],
+)
+
+prefix_rule(
+    pattern = [["npx", "bunx", "uvx", "pipx"]],
+    decision = "prompt",
+    justification = "C-HITL-02: one-off package execution needs approval.",
+)
+
+prefix_rule(
+    pattern = [["pnpm", "yarn", "bun"], ["add", "update", "upgrade", "remove", "dlx"]],
+    decision = "prompt",
+    justification = "C-HITL-02: dependency changes need approval.",
+)
+
+prefix_rule(
+    pattern = [["pip", "pip3"], ["install", "uninstall"]],
+    decision = "prompt",
+    justification = "C-HITL-02: dependency changes need approval. Use `uv sync --locked` for lockfile installs.",
+)
+
+prefix_rule(
+    pattern = [["python", "python3"], "-m", "pip", ["install", "uninstall"]],
+    decision = "prompt",
+    justification = "C-HITL-02: dependency changes need approval.",
+)
+
+prefix_rule(
+    pattern = ["uv", ["add", "remove", "pip", "tool"]],
+    decision = "prompt",
+    justification = "C-HITL-02: dependency changes need approval.",
+)
+
+prefix_rule(
+    pattern = ["poetry", ["add", "remove", "update"]],
+    decision = "prompt",
+    justification = "C-HITL-02: dependency changes need approval.",
+)
+
+prefix_rule(
+    pattern = ["cargo", ["add", "remove", "install", "update"]],
+    decision = "prompt",
+    justification = "C-HITL-02: dependency changes need approval.",
+)
+
+prefix_rule(
+    pattern = ["go", ["get", "install"]],
+    decision = "prompt",
+    justification = "C-HITL-02: dependency changes need approval.",
+)
+
+prefix_rule(
+    pattern = ["dotnet", ["add", "remove", "tool"]],
+    decision = "prompt",
+    justification = "C-HITL-02: dependency changes need approval.",
+)
+
+prefix_rule(
+    pattern = [["dart", "flutter"], "pub", ["add", "remove", "upgrade", "global"]],
+    decision = "prompt",
+    justification = "C-HITL-02: dependency changes need approval.",
+)
+
+prefix_rule(
+    pattern = [["brew", "apt", "apt-get", "choco", "winget"], ["install", "upgrade", "uninstall", "remove"]],
+    decision = "prompt",
+    justification = "C-HITL-02: system package changes need approval.",
+)
+
+prefix_rule(
+    pattern = [["curl", "wget", "ssh", "scp", "sftp", "rsync", "ftp", "nc", "ncat", "netcat", "socat", "telnet", "ping", "dig", "nslookup", "host"]],
+    decision = "prompt",
+    justification = "C-HITL-04: network access through the shell needs approval.",
+    match = ["curl https://example.com"],
+)
+
+prefix_rule(
+    pattern = [["docker", "podman", "kubectl", "helm", "terraform", "tofu", "terragrunt", "pulumi", "cdk", "aws", "gcloud", "gsutil", "az", "psql", "mysql", "mongosh", "redis-cli", "sqlcmd"]],
+    decision = "prompt",
+    justification = "C-HITL-06: containers, cloud, IaC, and database clients need approval; production is forbidden (N-07).",
+    match = ["kubectl get pods", "terraform plan"],
+)
+
+prefix_rule(
+    pattern = [["env", "printenv", "eval"]],
+    decision = "prompt",
+    justification = "C-HITL-08: dumping or evaluating the environment needs approval.",
+)

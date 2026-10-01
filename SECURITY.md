@@ -5,7 +5,7 @@ category: "governance"
 type: "policy"
 status: "active"
 date: 2026-09-20
-updated: 2026-09-21
+updated: 2026-10-01
 lang: "en"
 tags:
   - "security"
@@ -55,6 +55,7 @@ This repository adopts a 4-layer defense-in-depth model aligned with OWASP Top 1
 ### Layer 1: AI Agent Guardrails & Behavioral Rules (`.agents/rules/`)
 - AI coding assistants are bound by mandatory directives prohibiting hardcoded secrets, plain API tokens, mock cryptographic keys, and PII leakage.
 - Security-sentinel reviews inspect every proposal for indirect prompt injection vectors before merging.
+- Tool-level permission configurations (`.claude/`, `.codex/`, `.gemini/`, `.cursor/`, `.vscode/settings.json`) and a PreToolUse guard hook enforce the always / conditional / never tiers of `.agents/rules/permission-rules-general.md`.
 
 ### Layer 2: Local & Git Exclusion Hygiene (`.gitignore`)
 - Strict exclusion patterns cover private keys (`*.pem`, `id_rsa`), certificates (`*.crt`), cloud provider credentials (`.aws/`, `.gcp/`, `service_account*.json`), `.env*`, and local development dumps.

@@ -5,7 +5,7 @@ category: "meta"
 type: "configuration"
 status: "active"
 date: 2026-09-20
-updated: 2026-09-21
+updated: 2026-10-01
 lang: "en"
 tags:
   - "gemini"
@@ -18,6 +18,7 @@ tags:
 
 - **Governance Model**: Two-Phase Governance (Plan & Review before Code Mutation).
 - **Rules Reference**: Strictly adhere to `.agents/rules/coding-rules-general.md`, `.agents/rules/naming-rules-general.md`, and `.agents/rules/security-rules-general.md`.
+- **Permission Tiers**: Follow `.agents/rules/permission-rules-general.md` (A: always allow, C: conditional, N: never). Install `.gemini/policies/permission-policy.toml` in `~/.gemini/policies/` to enforce it (see `docs/guides/ai-permission-guide.md`).
 - **Naming Conventions**: Agent definitions MUST use `*.agent.md` suffix and MUST NOT prefix with `agent-`. Strictly follow `.agents/rules/naming-rules-general.md`.
 - **Language Profile**: Load `.agents/agents/languages/coding-profile-{PRIMARY_LANGUAGE}.md` when operating on project code.
 - **Skills Loading**: Leverage modular `SKILL.md` packages located in `.agents/skills/`.

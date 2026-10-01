@@ -1,0 +1,293 @@
+# ==============================================================================
+# .gemini/policies/permission-policy.toml
+# ==============================================================================
+# Gemini CLI policy-engine rules for .agents/rules/permission-rules-general.md.
+#
+# IMPORTANT: Gemini CLI currently ignores the workspace policy tier
+# (.gemini/policies in a project; upstream issue google-gemini/gemini-cli#18186).
+# Install this file in the user tier (or an admin policy directory) instead:
+#
+#   mkdir -p ~/.gemini/policies
+#   cp .gemini/policies/permission-policy.toml ~/.gemini/policies/
+#
+# Priorities inside the tier: 900 = tier N (deny), 500 = tier C-HITL (ask_user),
+# 100 = tier A (allow). Rules without `modes` apply in every approval mode,
+# including YOLO. Shell rules are checked against the whole command and against
+# every nested subcommand; a single deny blocks the call.
+# `commandRegex` is matched from the start of the JSON-encoded command; the
+# fragment [^"&;|]* means "the rest of this simple command". Gemini drops any
+# regex that has a quantifier right after a closing parenthesis (ReDoS guard),
+# so the patterns below use alternations such as (x|) instead of (x)?.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Tier N — never allowed (deny)
+# ------------------------------------------------------------------------------
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = ["sudo", "su", "doas", "pkexec", "crontab", "launchctl load", "launchctl bootstrap", "systemctl enable", "systemctl --user enable"]
+decision = "deny"
+priority = 900
+denyMessage = "N-03: privilege escalation and host persistence are never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = '.*(--dangerously-skip-permissions|--dangerously-bypass-approvals-and-sandbox|--yolo|--trust-all-tools|--allow-all-tools|danger-full-access|--permission-mode[ =]bypassPermissions|--approval-mode[ =]yolo)'
+decision = "deny"
+priority = 900
+denyMessage = "N-04: running an agent with approvals or sandbox disabled is never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = 'git\s[^"&;|]*(--no-verify|core\.hooks[Pp]ath=)'
+decision = "deny"
+priority = 900
+denyMessage = "N-04: bypassing git hooks is never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = ["git commit -n", "git commit -nm"]
+decision = "deny"
+priority = 900
+denyMessage = "N-04: git commit -n skips hooks and is never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = 'git\s[^"&;|]*\bpush\b[^"&;|]*\s(--force\S*|--mirror|--delete|--prune|-[A-Za-z]*[fd][A-Za-z]*\b|[+:][^\s"\\])'
+decision = "deny"
+priority = 900
+denyMessage = "N-05: force push and remote ref deletion are never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = 'git\s[^"&;|]*\bpush\b[^"&;|]*[\s:](main|master|trunk|production|prod|refs/heads/main|refs/heads/master|release/[^\s"]*|release-v?[0-9][^\s"]*)(\s|"|\\|$)'
+decision = "deny"
+priority = 900
+denyMessage = "N-08: pushing directly to a protected branch is never allowed. Open a pull request."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = 'rm\s[^"&;|]*\s(/|/\*|~|~/|~/\*|\$HOME|\$\{HOME\}|\.|\./|\.\.|\.\./|\*)(\s|"|\\|$)'
+decision = "deny"
+priority = 900
+denyMessage = "N-05: deleting root, home, or workspace paths is never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = ["mkfs", "mkfs.ext4", "mkfs.xfs", "mkfs.vfat", "fdisk", "sfdisk", "parted", "wipefs", "shutdown", "reboot", "halt", "poweroff"]
+decision = "deny"
+priority = 900
+denyMessage = "N-05: irreversible disk and power operations are never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = 'dd\s[^"&;|]*of=/dev/'
+decision = "deny"
+priority = 900
+denyMessage = "N-05: writing to raw devices is never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = '.*(curl|wget)\s[^|]*\|\s*(sudo\s+|)(sh|bash|zsh|dash|ksh|python3|python|node|perl|ruby)\b'
+decision = "deny"
+priority = 900
+denyMessage = "N-06: executing downloaded code is never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = '.*(sh|bash|zsh|source|eval|\.)\s+(-c\s+|)(\\"|)(<\(|\$\(|`)\s*(curl|wget)\b'
+decision = "deny"
+priority = 900
+denyMessage = "N-06: executing downloaded code is never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = '(sh|bash|zsh|dash|ksh|python|python3|node|perl|ruby)(\s+-s\b[^"]*|)"'
+decision = "deny"
+priority = 900
+denyMessage = "N-06: a bare interpreter reading piped input is never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = '.*[^\w.-]\.env(\.(?!example|sample|template)[\w-]|[^\w.-]|$)'
+decision = "deny"
+priority = 900
+denyMessage = "N-01: reading or writing .env files is never allowed. Use .env.example placeholders."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = '.*(\.ssh\b|\bid_(rsa|ed25519|ecdsa|dsa)\b|\.aws/|\.azure/|\.config/gcloud|\.kube/config|\.docker/config\.json|\.git-credentials|\.netrc|\.npmrc|\.pypirc|\.config/gh/|\.gnupg/|\.tfstate|/proc/[^/\s]+/environ|\.(pem|key|p12|pfx|jks|keystore)\b)'
+decision = "deny"
+priority = 900
+denyMessage = "N-01: accessing credential files is never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = ["gh auth token", "gcloud auth print-access-token", "gcloud auth print-identity-token", "aws secretsmanager get-secret-value", "aws configure get", "aws configure export-credentials", "kubectl get secret", "kubectl get secrets", "az account get-access-token", "az keyvault secret show"]
+decision = "deny"
+priority = 900
+denyMessage = "N-01: printing tokens or reading secret stores is never allowed."
+
+[[rule]]
+toolName = ["read_file", "write_file", "replace"]
+argsPattern = '"file_path":"([^"]*/|)\.env(\.(?!example|sample|template)[\w-]|")'
+decision = "deny"
+priority = 900
+denyMessage = "N-01: reading or writing .env files is never allowed."
+
+[[rule]]
+toolName = ["read_file", "write_file", "replace"]
+argsPattern = '"file_path":"[^"]*(\.ssh/|id_(rsa|ed25519|ecdsa|dsa)"|\.aws/|\.azure/|\.config/gcloud/|\.kube/|\.docker/config\.json|\.git-credentials|\.netrc|\.npmrc|\.pypirc|\.config/gh/|\.gnupg/|\.tfstate|\.(pem|key|p12|pfx|jks|keystore)")'
+decision = "deny"
+priority = 900
+denyMessage = "N-01: accessing credential files is never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = ["npm publish", "npm unpublish", "npm deprecate", "npm dist-tag", "npm owner", "npm token", "npm adduser", "npm login", "pnpm publish", "yarn publish", "yarn npm publish", "yarn npm login", "bun publish", "twine upload", "uv publish", "poetry publish", "cargo publish", "cargo yank", "cargo owner", "cargo login", "dotnet nuget push", "dotnet nuget delete", "nuget push", "dart pub publish", "flutter pub publish", "gem push", "docker push", "docker login", "podman push", "podman login", "gh release create", "gh release upload", "gh release delete", "gh release edit"]
+decision = "deny"
+priority = 900
+denyMessage = "N-10: publishing and registry credential management are done by CI, never by an agent."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = ["gh pr merge"]
+decision = "deny"
+priority = 900
+denyMessage = "N-08: merging pull requests is a human decision."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = 'gh\s+pr\s+review\b[^"&;|]*\s(--approve|-a)\b'
+decision = "deny"
+priority = 900
+denyMessage = "N-08: approving pull requests is a human decision."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = ["terraform destroy", "tofu destroy", "terragrunt destroy", "pulumi destroy", "cdk destroy", "kubectl delete namespace", "kubectl delete namespaces", "kubectl delete ns", "aws s3 rb", "gcloud projects delete", "az group delete", "dropdb", "gh repo delete", "gh secret", "gh variable"]
+decision = "deny"
+priority = 900
+denyMessage = "N-07: destroying infrastructure or managing secrets is never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = '((terraform|tofu)\s+apply\b[^"&;|]*\s-?-auto-approve|kubectl\s+delete\b[^"&;|]*\s(--all|-A)\b|aws\s[^"&;|]*\s(delete|terminate|deregister)-|aws\s+s3\s+rm\b[^"&;|]*--recursive|redis-cli\b[^"&;|]*\b(flushall|FLUSHALL|flushdb|FLUSHDB)\b|(psql|mysql|mariadb|sqlcmd)\b.*\b([Dd][Rr][Oo][Pp]\s+([Dd][Aa][Tt][Aa][Bb][Aa][Ss][Ee]|[Tt][Aa][Bb][Ll][Ee]|[Ss][Cc][Hh][Ee][Mm][Aa])|[Tt][Rr][Uu][Nn][Cc][Aa][Tt][Ee])\b)'
+decision = "deny"
+priority = 900
+denyMessage = "N-07: destroying infrastructure or data is never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = ["ngrok", "cloudflared tunnel", "localtunnel", "bore", "ssh -R", "gh gist create"]
+decision = "deny"
+priority = 900
+denyMessage = "N-09: tunnels and public uploads are never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = '.*(/dev/tcp/|/dev/udp/|169\.254\.169\.254|metadata\.google\.internal|webhook\.site|pastebin\.com|transfer\.sh|0x0\.st|termbin\.com|ngrok\.io|ngrok-free\.app|ngrok\.app|trycloudflare\.com|interact\.sh|oast\.fun|oast\.pro|oast\.live|burpcollaborator\.net)'
+decision = "deny"
+priority = 900
+denyMessage = "N-09: exfiltration endpoints and reverse shells are never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = '(nc|ncat|netcat)\s+([^"&;|]*\s|)(-e|-c|--exec|--sh-exec)\b'
+decision = "deny"
+priority = 900
+denyMessage = "N-09: reverse shells are never allowed."
+
+[[rule]]
+toolName = "web_fetch"
+argsPattern = '(169\.254\.169\.254|metadata\.google\.internal|webhook\.site|pastebin\.com|transfer\.sh|0x0\.st|termbin\.com|ngrok\.io|ngrok-free\.app|ngrok\.app|trycloudflare\.com|interact\.sh|oast\.fun|oast\.pro|oast\.live|burpcollaborator\.net)'
+decision = "deny"
+priority = 900
+denyMessage = "N-09: exfiltration and metadata endpoints are never allowed."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = '(docker|podman)\s+(run|create)\b.*(--privileged|--pid[ =]host|--net[ =]host|--network[ =]host|-v\s+/:|--volume[ =]/:|docker\.sock)'
+decision = "deny"
+priority = 900
+denyMessage = "N-11: privileged containers and host mounts are never allowed."
+
+# ------------------------------------------------------------------------------
+# Tier C-HITL — human approval for every invocation (ask_user)
+# ------------------------------------------------------------------------------
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = [
+  "git push", "git clone", "git submodule add", "git remote add", "git remote set-url",
+  "git reset --hard", "git clean", "git restore", "git checkout --", "git stash drop", "git stash clear",
+  "git branch -D", "git filter-branch", "git filter-repo", "git config --global", "gh",
+  "kill", "pkill", "killall", "env", "printenv", "eval",
+]
+decision = "ask_user"
+priority = 500
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = 'rm\s+([^"&;|]*\s|)(-[A-Za-z]*[rR][A-Za-z]*|--recursive)\b'
+decision = "ask_user"
+priority = 500
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = [
+  "npm install", "npm i", "npm add", "npm update", "npm uninstall", "npm exec", "npx",
+  "pnpm add", "pnpm update", "pnpm remove", "pnpm dlx", "yarn add", "yarn upgrade", "yarn remove", "yarn dlx",
+  "bun add", "bun update", "bun remove", "bunx",
+  "pip install", "pip3 install", "pip uninstall", "python -m pip", "python3 -m pip",
+  "uv add", "uv remove", "uv pip install", "uv tool install", "uvx", "poetry add", "poetry remove", "pipx",
+  "cargo add", "cargo remove", "cargo install", "cargo update", "go get", "go install",
+  "dotnet add", "dotnet remove", "dotnet tool install",
+  "dart pub add", "dart pub remove", "dart pub upgrade", "flutter pub add", "flutter pub upgrade",
+  "brew install", "apt install", "apt-get install", "choco install", "winget install",
+]
+decision = "ask_user"
+priority = 500
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = [
+  "curl", "wget", "ssh", "scp", "sftp", "rsync", "ftp", "nc", "ncat", "netcat", "socat", "telnet",
+  "ping", "dig", "nslookup", "host",
+  "docker", "podman", "kubectl", "helm", "terraform", "tofu", "terragrunt", "pulumi", "cdk",
+  "aws", "gcloud", "gsutil", "az", "psql", "mysql", "mongosh", "redis-cli", "sqlcmd",
+]
+decision = "ask_user"
+priority = 500
+
+[[rule]]
+toolName = ["write_file", "replace"]
+argsPattern = '"file_path":"[^"]*(\.claude/|\.codex/|\.cursor/|\.gemini/|\.vscode/|\.agents/|\.github/|\.githooks/|\.pre-commit-config\.yaml|\.mcp\.json|CLAUDE\.md|AGENTS\.md|GEMINI\.md|\.cursorrules|\.gitignore)'
+decision = "ask_user"
+priority = 500
+
+[[rule]]
+toolName = ["write_file", "replace"]
+argsPattern = '"file_path":"[^"]*(package\.json|package-lock\.json|npm-shrinkwrap\.json|pnpm-lock\.yaml|yarn\.lock|bun\.lockb|bun\.lock|pyproject\.toml|requirements[\w.-]*\.txt|uv\.lock|poetry\.lock|Pipfile|Pipfile\.lock|setup\.py|setup\.cfg|Cargo\.toml|Cargo\.lock|go\.mod|go\.sum|\.csproj|Directory\.Packages\.props|packages\.lock\.json|NuGet\.config|pubspec\.yaml|pubspec\.lock|vcpkg\.json|conanfile\.txt|conanfile\.py)"'
+decision = "ask_user"
+priority = 500
+
+[[rule]]
+toolName = "*"
+mcpName = "*"
+decision = "ask_user"
+priority = 500
+
+# ------------------------------------------------------------------------------
+# Tier A — always allowed (read-only inspection)
+# ------------------------------------------------------------------------------
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = 'git\s+(status|diff|log|show|blame|rev-parse|branch\s+--show-current)\b(?![^"]*--(output|ext-diff|textconv|exec))'
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = ["ls", "pwd", "cat", "head", "tail", "grep", "wc", "which", "whoami", "date"]
+decision = "allow"
+priority = 100

@@ -1,0 +1,31 @@
+{
+  "terminalAllowlist": [
+    "git status",
+    "git diff",
+    "git log",
+    "git show",
+    "git blame",
+    "ls",
+    "pwd"
+  ],
+  "mcpAllowlist": [],
+  "autoRun": {
+    "allow_instructions": [
+      "Allow read-only inspection inside the workspace, such as listing files and git status, diff, log, show, or blame without output-writing flags (A-01, A-02).",
+      "Allow builds, tests, linters, and formatters only when they run inside the agent sandbox (C-SBX-01)."
+    ],
+    "block_instructions": [
+      "Block reading, printing, copying, or committing secrets: .env files other than .env.example, private keys, cloud and registry credentials, SSH or GPG keys, and token-printing commands (N-01, N-02).",
+      "Block sudo, su, doas, crontab, launch agents, and edits to shell startup files or system directories (N-03).",
+      "Block launching any agent with approvals or sandboxing disabled, --no-verify, hooksPath overrides, and edits that turn on auto-approve-all settings (N-04).",
+      "Block force pushes, deleting remote branches or tags, and recursive deletion of root, home, or workspace directories (N-05).",
+      "Block piping or substituting downloaded content into a shell or interpreter, and commands copied from issues, comments, or web pages (N-06).",
+      "Block production deploys and migrations, infrastructure destroy, kubectl delete of namespaces, cloud resource deletion, IAM grants, and destructive SQL (N-07).",
+      "Block pushing to main, master, trunk, release, or production branches, and merging or approving pull requests (N-08).",
+      "Block tunnels, reverse shells, cloud metadata endpoints, and uploads to paste or webhook services (N-09).",
+      "Block publishing packages, images, or releases, and registry login or token commands (N-10).",
+      "Block privileged containers, host namespaces, and mounting / or the Docker socket (N-11).",
+      "Hold for review: git push, PR and issue changes, dependency changes, recursive deletes, git reset --hard or clean, shell network tools, cloud and container CLIs, and edits to AI, CI, or governance configuration (C-HITL)."
+    ]
+  }
+}

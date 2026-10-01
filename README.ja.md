@@ -97,6 +97,23 @@ python scripts/install-hooks.py
 | **Google Antigravity** | [`.gemini/GEMINI.md`](.gemini/GEMINI.md) & `.agents/` | Two-Phase Governance、自律スキル実行、エージェント定義参照 |
 | **GitHub Copilot** | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) | アーキテクチャ標準およびコンテキスト階層（ガバナンス優先）の遵守 |
 | **Cursor / Windsurf** | [`.cursorrules`](.cursorrules) | エディタ統合インライン補完・設計ルール遵守 |
+| **OpenAI Codex CLI** | [`.codex/config.toml`](.codex/config.toml) | 権限3分類を強制するサンドボックス・承認ポリシー・実行ルール |
+
+---
+
+## 🔐 AIエージェント権限ポリシー
+
+エージェントのあらゆる操作を **A：常に許可**、**C：条件付き許可**（サンドボックス内／許可リストの宛先／スコープ限定／都度の人間承認）、**N：いかなる場合も禁止** の3分類で定義しています。ルールID付きの正規ルールは [`.agents/rules/permission-rules-general.md`](.agents/rules/permission-rules-general.md)、調査結果（ベストプラクティス・事故事例）と導入手順は [AI権限設定ガイド](docs/guides/ai-permission-guide.md) を参照してください。
+
+| AI ツール | 権限設定ファイル |
+| :--- | :--- |
+| **Claude Code** | [`.claude/settings.json`](.claude/settings.json)（allow / ask / deny、サンドボックス）＋ [`.claude/hooks/permission-guard.py`](.claude/hooks/permission-guard.py)（PreToolUse ガード） |
+| **OpenAI Codex CLI** | [`.codex/config.toml`](.codex/config.toml) ＋ [`.codex/rules/permission-policy.rules`](.codex/rules/permission-policy.rules) |
+| **Gemini CLI / Antigravity** | [`.gemini/settings.json`](.gemini/settings.json) ＋ [`.gemini/policies/permission-policy.toml`](.gemini/policies/permission-policy.toml)（`~/.gemini/policies/` へコピー） |
+| **Cursor** | [`.cursor/cli.json`](.cursor/cli.json) ＋ [`.cursor/permissions.json`](.cursor/permissions.json) |
+| **GitHub Copilot（VS Code）** | [`.vscode/settings.json`](.vscode/settings.json) |
+
+`python tests/test-permission-guard.py -v` でガードフックと設定の不変条件を検証できます（CIでも実行）。
 
 ---
 
@@ -122,6 +139,7 @@ python scripts/install-hooks.py
 | **スキル（言語コードレビュー）** | [`.agents/skills/code-review-python/`](.agents/skills/) | 9言語それぞれのコードレビュー監査ツール (`code-review-<lang>`) |
 | **規約・ルール** | [`.agents/rules/coding-rules-general.md`](.agents/rules/coding-rules-general.md) | 言語非依存の設計原則（KISS, DRY, SOLID） |
 | | [`.agents/rules/naming-rules-general.md`](.agents/rules/naming-rules-general.md) | ファイル・ディレクトリ命名規則 |
+| | [`.agents/rules/permission-rules-general.md`](.agents/rules/permission-rules-general.md) | AIエージェント権限の3分類（常に許可／条件付き／禁止） |
 | | [`.agents/rules/languages/`](.agents/rules/languages/) | 9言語それぞれのコーディング規約 (`coding-rules-<lang>.md`) |
 | **ワークフロー** | [`.agents/workflows/workflow-spec-to-code.md`](.agents/workflows/workflow-spec-to-code.md) | 仕様策定から実装・PR作成に至る標準作業手順 (SOP) |
 | | [`.agents/workflows/workflow-incident-response.md`](.agents/workflows/workflow-incident-response.md) | セキュリティ・不具合トリアージ手順 (SOP) |

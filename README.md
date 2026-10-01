@@ -97,6 +97,23 @@ python scripts/install-hooks.py
 | **Google Antigravity** | [`.gemini/GEMINI.md`](.gemini/GEMINI.md) & `.agents/` | Two-phase governance, autonomous skill loading, agent roles |
 | **GitHub Copilot** | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) | Architectural standards and context hierarchy enforcement |
 | **Cursor / Windsurf** | [`.cursorrules`](.cursorrules) | Editor-level inline intelligence and rules adherence |
+| **OpenAI Codex CLI** | [`.codex/config.toml`](.codex/config.toml) | Sandbox, approval policy, and execution rules for the permission tiers |
+
+---
+
+## 🔐 AI Agent Permission Policy
+
+Every agent action is classified as **A — always allow**, **C — conditionally allow** (sandbox, allowlisted destination, limited scope, or per-action human approval), or **N — never allow**. The canonical rules with stable IDs live in [`.agents/rules/permission-rules-general.md`](.agents/rules/permission-rules-general.md); the research, incident case studies, and setup steps are in the [AI permission guide](docs/guides/ai-permission-guide.md) (Japanese).
+
+| AI Tool | Permission Configuration |
+| :--- | :--- |
+| **Claude Code** | [`.claude/settings.json`](.claude/settings.json) (allow / ask / deny, sandbox) + [`.claude/hooks/permission-guard.py`](.claude/hooks/permission-guard.py) (PreToolUse guard) |
+| **OpenAI Codex CLI** | [`.codex/config.toml`](.codex/config.toml) + [`.codex/rules/permission-policy.rules`](.codex/rules/permission-policy.rules) |
+| **Gemini CLI / Antigravity** | [`.gemini/settings.json`](.gemini/settings.json) + [`.gemini/policies/permission-policy.toml`](.gemini/policies/permission-policy.toml) (copy to `~/.gemini/policies/`) |
+| **Cursor** | [`.cursor/cli.json`](.cursor/cli.json) + [`.cursor/permissions.json`](.cursor/permissions.json) |
+| **GitHub Copilot (VS Code)** | [`.vscode/settings.json`](.vscode/settings.json) |
+
+Run `python tests/test-permission-guard.py -v` to verify the guard hook and the configuration invariants (also executed in CI).
 
 ---
 
@@ -122,6 +139,7 @@ All resources follow strict naming conventions (agent definitions use `*.agent.m
 | **Skills (Language Reviews)** | [`.agents/skills/code-review-python/`](.agents/skills/) | `code-review-<lang>` for 9 supported languages |
 | **Rules** | [`.agents/rules/coding-rules-general.md`](.agents/rules/coding-rules-general.md) | Clean code principles (DRY, KISS, SOLID) |
 | | [`.agents/rules/naming-rules-general.md`](.agents/rules/naming-rules-general.md) | File & directory naming conventions |
+| | [`.agents/rules/permission-rules-general.md`](.agents/rules/permission-rules-general.md) | AI agent permission tiers (always / conditional / never) |
 | | [`.agents/rules/languages/`](.agents/rules/languages/) | Specific coding rules (`coding-rules-<lang>.md`) for 9 languages |
 | **Workflows** | [`.agents/workflows/workflow-spec-to-code.md`](.agents/workflows/workflow-spec-to-code.md) | Spec-to-Code standard operating procedure |
 | | [`.agents/workflows/workflow-incident-response.md`](.agents/workflows/workflow-incident-response.md) | Security & defect triage SOP |
