@@ -68,7 +68,7 @@ If this repository was instantiated from a GitHub Template:
 git clone {REPOSITORY_URL}.git
 cd {REPOSITORY_NAME}
 
-# Edit configuration parameters in template.config.yaml (or .json)
+# Edit configuration parameters in template.config.yaml
 # Then apply substitution across all repository files:
 python scripts/apply-template.py
 

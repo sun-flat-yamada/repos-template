@@ -5,7 +5,7 @@ scripts/apply-template.py
 GitHub Repository Template - Parameter Substitution & Verification Engine
 ==============================================================================
 Substitutes placeholders formatted as {<UPPER_SNAKE_CASE>} throughout the
-repository based on mappings defined in template.config.yaml or template.config.json.
+repository based on mappings defined in template.config.yaml.
 
 Zero external dependencies: runs purely with Python 3.8+ standard libraries.
 """
@@ -13,7 +13,6 @@ Zero external dependencies: runs purely with Python 3.8+ standard libraries.
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import re
 import sys
@@ -64,6 +63,8 @@ EXCLUDE_EXTS: Set[str] = {
     ".eot",
 }
 
+CONFIG_FILE_NAME = "template.config.yaml"
+
 # Regex to detect placeholders like {PROJECT_NAME}, {REPOSITORY_OWNER}, etc.
 # Uses negative lookbehind (?<!\$) so Bash/Zsh variables like ${VAR} are not falsely matched.
 PLACEHOLDER_PATTERN = re.compile(r"(?<!\$)\{([A-Z0-9_]{3,})\}")
@@ -88,24 +89,20 @@ def parse_simple_yaml(text: str) -> Dict[str, str]:
 
 
 def load_config(config_path: Path) -> Dict[str, str]:
-    """Load configuration parameters from YAML or JSON."""
+    """Load configuration parameters from YAML."""
     if not config_path.exists():
         raise FileNotFoundError(f"Configuration file not found: {config_path}")
 
     content = config_path.read_text(encoding="utf-8")
-    if config_path.suffix.lower() == ".json":
-        data = json.loads(content)
-        return {str(k): str(v) for k, v in data.items()}
-    else:
-        # Try PyYAML if installed, otherwise use simple fallback
-        try:
-            import yaml  # type: ignore
-            data = yaml.safe_load(content)
-            if isinstance(data, dict):
-                return {str(k): str(v) for k, v in data.items()}
-        except ImportError:
-            pass
-        return parse_simple_yaml(content)
+    # Try PyYAML if installed, otherwise use simple fallback
+    try:
+        import yaml  # type: ignore
+        data = yaml.safe_load(content)
+        if isinstance(data, dict):
+            return {str(k): str(v) for k, v in data.items()}
+    except ImportError:
+        pass
+    return parse_simple_yaml(content)
 
 
 def should_skip_dir(dir_name: str) -> bool:
@@ -136,7 +133,7 @@ def inspect_placeholders(root: Path, self_path: Path | None = None) -> Dict[Path
     """Find all unresolved placeholders across candidate files."""
     results: Dict[Path, List[Tuple[int, str]]] = {}
     for file_path in find_files(root):
-        if file_path.name in {"template.config.yaml", "template.config.json"}:
+        if file_path.name == CONFIG_FILE_NAME:
             continue
         if self_path and file_path.resolve() == self_path.resolve():
             continue
@@ -174,7 +171,7 @@ def apply_substitutions(
 
     for file_path in files:
         # Don't overwrite the config file or this script during normal run
-        if file_path.name in {"template.config.yaml", "template.config.json"}:
+        if file_path.name == CONFIG_FILE_NAME:
             continue
         if self_path and file_path.resolve() == self_path.resolve():
             continue
@@ -205,8 +202,7 @@ def apply_substitutions(
 def finalize_cleanup(root: Path) -> None:
     """Optionally remove template parameter files and initial setup engine."""
     targets = [
-        root / "template.config.yaml",
-        root / "template.config.json",
+        root / CONFIG_FILE_NAME,
         root / "scripts" / "setup.ps1",
         root / "scripts" / "setup.sh",
     ]
@@ -226,7 +222,7 @@ def main() -> int:
         "-c",
         type=Path,
         default=None,
-        help="Path to configuration YAML or JSON (default: template.config.yaml or template.config.json)",
+        help=f"Path to the configuration YAML (default: {CONFIG_FILE_NAME})",
     )
     parser.add_argument(
         "--dry-run",
@@ -268,14 +264,9 @@ def main() -> int:
     # Determine config file
     config_path = args.config
     if config_path is None:
-        yaml_cand = root / "template.config.yaml"
-        json_cand = root / "template.config.json"
-        if yaml_cand.exists():
-            config_path = yaml_cand
-        elif json_cand.exists():
-            config_path = json_cand
-        else:
-            print("[ERROR] Neither template.config.yaml nor template.config.json found.")
+        config_path = root / CONFIG_FILE_NAME
+        if not config_path.exists():
+            print(f"[ERROR] {CONFIG_FILE_NAME} not found.")
             return 1
 
     print(f"[*] Loading config from: {config_path}")

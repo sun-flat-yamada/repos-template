@@ -68,7 +68,7 @@ flowchart TB
 git clone {REPOSITORY_URL}.git
 cd {REPOSITORY_NAME}
 
-# template.config.yaml (または .json) を編集してプロジェクト情報を設定
+# template.config.yaml を編集してプロジェクト情報を設定
 # 以下のスクリプトで全ファイルへプレースホルダーを一括自動置換
 python scripts/apply-template.py
 
