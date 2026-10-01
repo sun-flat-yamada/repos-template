@@ -91,8 +91,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+# No lib/ or lib64/ here: Dart and many JS/TS packages keep source in lib/.
 parts/
 sdist/
 var/
@@ -102,8 +101,8 @@ wheels/
 *.egg
 .venv/
 venv/
-ENV/
-env/
+/ENV/
+/env/
 .pytest_cache/
 .coverage
 htmlcov/
@@ -123,7 +122,7 @@ pnpm-debug.log*
 .pnpm-store/
 lerna-debug.log*
 .next/
-out/
+/out/
 .nuxt/
 .vuepress/dist
 .serverless/
@@ -135,7 +134,7 @@ out/
 # ------------------------------------------------------------------------------
 /target/
 **/*.rs.bk
-Cargo.lock
+# Commit Cargo.lock: `cargo build --locked` (policy C-SBX-02) needs it.
 
 # ------------------------------------------------------------------------------
 # Go
@@ -144,15 +143,15 @@ Cargo.lock
 *.test
 *.prof
 *.out
-/bin/
-/pkg/
+# No /bin/ or /pkg/ here: Dart keeps entry points in bin/ and Go code often
+# lives in pkg/.
 
 # ------------------------------------------------------------------------------
 # Dart / Flutter
 # ------------------------------------------------------------------------------
 .dart_tool/
 .packages
-pubspec.lock
+# Commit pubspec.lock: `dart pub get --enforce-lockfile` (policy C-SBX-02) needs it.
 build/
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -170,14 +169,16 @@ build/
 CMakeCache.txt
 CMakeFiles/
 CMakeScripts/
-Testing/
-Makefile
+/Testing/
+# No Makefile here: build in build/ (ignored above) so a hand-written root
+# Makefile can be committed.
 compile_commands.json
 
 # ------------------------------------------------------------------------------
 # C# / .NET
 # ------------------------------------------------------------------------------
-bin/
+[Bb]in/[Dd]ebug/
+[Bb]in/[Rr]elease/
 obj/
 *.user
 *.suo
@@ -189,11 +190,15 @@ project.lock.json
 # ------------------------------------------------------------------------------
 # AI Agent Local Cache & Temporary Session Files
 # ------------------------------------------------------------------------------
-# Share the team permission policy (.claude/settings.json + hooks); keep
-# personal overrides (.claude/settings.local.json) and session data local.
+# Share the team permission policy (.claude/settings.json + hooks) and the
+# project skills, subagents, and commands; keep personal overrides
+# (.claude/settings.local.json) and session data local.
 .claude/*
 !.claude/settings.json
 !.claude/hooks/
+!.claude/skills/
+!.claude/agents/
+!.claude/commands/
 .gemini_local/
 .ai_cache/
 *.transcript.jsonl
