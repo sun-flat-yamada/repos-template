@@ -1,0 +1,33 @@
+# ==============================================================================
+# .codex/config.toml — project-scoped Codex CLI configuration
+# ==============================================================================
+# Enforces .agents/rules/permission-rules-general.md together with
+# .codex/rules/permission-policy.rules. Codex loads this file only after you
+# trust the project. Provider, auth, profile, notify, and telemetry keys are
+# ignored in project config by design; keep them in ~/.codex/config.toml.
+# ==============================================================================
+
+# C-SBX / C-HITL: commands run inside the sandbox without prompting; anything
+# that must leave it (network, writes outside the workspace) asks a human.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+# C-HITL: escalation requests are reviewed by a human, not an automated reviewer.
+approvals_reviewer = "user"
+
+# A-04: cached web search limits exposure to live prompt-injection content.
+web_search = "cached"
+
+[sandbox_workspace_write]
+# C-NET: sandboxed commands get no outbound network. Codex has no per-domain
+# allowlist in this mode, so registry access escalates to a human (C-HITL).
+network_access = false
+# C-SCOPE-01: nothing writable beyond the workspace and temp directories.
+writable_roots = []
+
+[shell_environment_policy]
+# N-01: strip secret-looking variables (*KEY*, *SECRET*, *TOKEN*) and cloud
+# credentials from the environment of every spawned command.
+inherit = "all"
+ignore_default_excludes = false
+exclude = ["AWS_*", "AZURE_*", "GOOGLE_APPLICATION_CREDENTIALS", "*PASSWORD*", "*CREDENTIAL*", "DATABASE_URL", "*_PAT"]

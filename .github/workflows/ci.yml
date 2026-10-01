@@ -25,7 +25,11 @@ jobs:
 
       - name: Syntax & Compilation Check
         run: |
-          python -m py_compile scripts/apply-template.py scripts/install-hooks.py scripts/validate-filenames.py
+          python -m py_compile scripts/apply-template.py scripts/install-hooks.py scripts/validate-filenames.py .claude/hooks/permission-guard.py
+
+      - name: AI Permission Policy Tests
+        run: |
+          python tests/test-permission-guard.py -v
 
       - name: File Naming Convention Check
         run: |

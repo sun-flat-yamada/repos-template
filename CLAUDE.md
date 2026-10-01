@@ -21,6 +21,7 @@ tags:
 @.agents/rules/naming-rules-general.md
 @.agents/rules/security-rules-general.md
 @.agents/rules/git-rules-commit.md
+@.agents/rules/permission-rules-general.md
 
 ## Commands
 - `/status`: Show git status, current branch, and template placeholder verification.
@@ -33,5 +34,6 @@ tags:
 ## Directives
 - **Naming Rule Enforcement**: Adhere strictly to `.agents/rules/naming-rules-general.md`. Agent definition files MUST use the suffix `*.agent.md` and MUST NEVER use the `agent-` prefix.
 - **Zero Secrets**: Never output or commit API keys, tokens, or private credentials.
+- **Permission Tiers**: Follow `.agents/rules/permission-rules-general.md` (A: always allow, C: conditional, N: never). `.claude/settings.json` and `.claude/hooks/permission-guard.py` enforce it; never try to work around a denied or prompted action.
 - **TDD Requirement**: Propose unit tests before modifying or implementing application logic.
 - **Language Alignment**: Consult language-specific profile in `.agents/agents/languages/coding-profile-{PRIMARY_LANGUAGE}.md`.

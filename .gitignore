@@ -189,7 +189,11 @@ project.lock.json
 # ------------------------------------------------------------------------------
 # AI Agent Local Cache & Temporary Session Files
 # ------------------------------------------------------------------------------
-.claude/
+# Share the team permission policy (.claude/settings.json + hooks); keep
+# personal overrides (.claude/settings.local.json) and session data local.
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
 .gemini_local/
 .ai_cache/
 *.transcript.jsonl

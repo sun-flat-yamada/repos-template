@@ -9,3 +9,12 @@
 /.github/workflows/ @{AUTHOR_GITHUB}
 /.agents/ @{AUTHOR_GITHUB}
 /docs/adr/ @{AUTHOR_GITHUB}
+
+# AI Agent Permission Configuration (see .agents/rules/permission-rules-general.md)
+/CLAUDE.md @{AUTHOR_GITHUB}
+/.claude/ @{AUTHOR_GITHUB}
+/.codex/ @{AUTHOR_GITHUB}
+/.cursor/ @{AUTHOR_GITHUB}
+/.cursorrules @{AUTHOR_GITHUB}
+/.gemini/ @{AUTHOR_GITHUB}
+/.vscode/ @{AUTHOR_GITHUB}
