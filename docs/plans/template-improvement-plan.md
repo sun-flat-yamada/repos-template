@@ -3,7 +3,7 @@ title: "Repository Template Review & Improvement Plan"
 description: "repos-template 全体（テンプレートエンジン、AIツール連携、権限ポリシーとガードフック、CI/CD、Gitフック、.gitignore、ドキュメント、.agents 資産、命名規則）のレビュー結果と、優先度付きの段階的改善計画。"
 category: "plan"
 type: "review"
-status: "proposed"
+status: "active"
 date: 2026-10-01
 updated: 2026-10-01
 lang: "ja"
@@ -19,6 +19,7 @@ tags:
 
 > - 対象: `main` @ `55cbb47`（追跡ファイル 115 件、約 8,800 行）
 > - レビュー日: 2026-10-01
+> - 2026-10-01 更新: §5 の判断が確定し、ロードマップに反映しました（Copier への移行を Phase 1 に前倒しするなど）。
 > - 本書はテンプレート保守者向けの作業計画です。全項目の完了後は削除またはアーカイブし、派生プロジェクトには持ち込みません（A-5 参照）。
 
 ---
@@ -93,7 +94,7 @@ tags:
 #### A-3 🟠 脆弱性の報告先がダミーアドレスになる
 
 - **根拠**: `template.config.yaml:21` の `AUTHOR_EMAIL: "yamada.developer@example.com"` が、そのまま `SECURITY.md:38` に入ります（再現済み）。
-- **対応**: 既定値を空にし、未設定なら適用を失敗させます。報告の主経路は GitHub Private Vulnerability Reporting とし、メールは任意項目にします。
+- **対応**: Copier への移行（P1-1）で、メールを検証付きの質問にして解消します（決定 #3）。既定値を空にし、未設定なら適用を失敗させます。報告の主経路は GitHub Private Vulnerability Reporting とし、メールは任意項目にします。
 
 #### A-4 🔴 プレースホルダー検査の誤検知で派生プロジェクトのコミットが止まる
 
@@ -115,12 +116,12 @@ tags:
 #### A-7 🟡 全 9 言語ぶんの資産が派生プロジェクトに残る
 
 - **影響**: 言語別の 45 ファイル（H-1）が `PRIMARY_LANGUAGE` と関係なく残り、エージェントのコンテキストを圧迫してノイズになります。
-- **対応**: 適用時に、選ばれなかった言語の資産を削除します。`PRIMARY_LANGUAGE` はリストにして、複数言語のプロジェクトにも対応させます。
+- **決定**: 対応しません（決定 #4: 全言語を維持）。重複の解消は H-1 で行います。
 
 #### A-8 🟡 テンプレートの更新を派生リポジトリへ伝播できない
 
 - **影響**: 一度置換すると元に戻せず、テンプレート側の改善（権限ポリシーの更新など）を取り込む手段がありません。
-- **対応（要 ADR）**: Copier に移行して `copier update` で差分を適用するか、テンプレート由来ファイルの同期スクリプトを提供します。
+- **対応（決定 #3）**: Copier に移行し、`copier update` で差分を適用します。P1-1 で実施し、設計は ADR-0002 に記録します。
 
 #### A-9 ⚪ 細かな不具合
 
@@ -189,7 +190,7 @@ tags:
 
 - タグの push（`git push origin v1.0.0`）は `release.yml` を起動するため、実質的にはリリース操作です。しかし現在は通常の C-HITL-01 と同じ扱いです。専用のメッセージか専用のルールを検討します。
 - Cursor・Gemini CLI・Codex にもフックの仕組みがあります。現在ガードにつながっているのは Claude Code と VS Code（`chat.useClaudeHooks`）だけなので、接続できるか検証して検討します。
-- `permissions.disableAutoMode` と `sandbox.allowUnsandboxedCommands` を採用するかどうかを決め、理由を ADR-0001 に追記します。
+- `permissions.disableAutoMode` と `sandbox.allowUnsandboxedCommands` は設定しないことに決定しました（決定 #6）。理由は ADR-0001 の追記に記録しています。
 
 ### D. CI/CD とサプライチェーン
 
@@ -228,7 +229,7 @@ tags:
 #### D-7 🟡 リリース自動化の記述と実装が食い違う
 
 - **根拠**: `README.md:42` は「automated semantic releases」と書いていますが、`release.yml` はタグの push で下書きリリースを作るだけです。CHANGELOG も手作業で更新しています。
-- **対応（要選定）**: release-please、semantic-release、git-cliff のいずれかを採用し、CHANGELOG の生成まで自動化します。採用しない場合は README の記述を実態に合わせます。
+- **対応（決定 #5）**: release-please を採用し、CHANGELOG の生成まで自動化します。採用しない場合は README の記述を実態に合わせます。
 
 #### D-8 🟡 サーバー側の保護（ブランチ保護・ルールセット）が提供されていない
 
@@ -249,7 +250,7 @@ tags:
   - `install-hooks.py` は `core.hooksPath=.githooks` を設定しますが、`.pre-commit-config.yaml` は `pre-commit install` を前提にしています。pre-commit は `core.hooksPath` が設定されているとインストールを拒否するため、両立しません。
   - 検査内容も別物です。`.githooks` は簡易な正規表現と命名検査、pre-commit は gitleaks・プレースホルダー検査・YAML/JSON 検査を行います。
   - `SECURITY.md:63-64` には「`.githooks` がプレースホルダーを検査する」と書かれていますが、実装されていません。
-- **対応（要判断）**: pre-commit フレームワークに一本化し（commit-msg の検査も pre-commit で実行）、`.githooks` を廃止します。または、`.githooks` から pre-commit を呼び出す形に統合します。
+- **対応（決定 #2）**: pre-commit フレームワークに一本化し（commit-msg の検査も pre-commit で実行）、`.githooks` を廃止します。または、`.githooks` から pre-commit を呼び出す形に統合します。
 
 #### E-2 🟡 `.githooks/pre-commit` の秘密検出が狭い
 
@@ -282,7 +283,7 @@ tags:
 | `Makefile` | `.gitignore:174` | ドキュメントは `make check` を案内しているのに、Makefile を追加できない |
 | `src/Testing/a.cs` | `.gitignore:173` の `Testing/` | CMake 用の規則が任意の階層に効いてしまう |
 
-- **対応**: 言語別の規則は、`PRIMARY_LANGUAGE` に応じて適用時に組み立てます（github/gitignore を基にする）。全言語共通の規則はルートに固定し、`/build/` のようにアンカーを付けます。
+- **対応**: 全言語の規則は残したまま（決定 #4）、言語間で衝突するパターンを削除するかアンカーを付けます（P0-1）。全言語共通の規則はルートに固定し、`/build/` のようにアンカーを付けます。
 
 #### F-2 🟠 ロックファイルを無視している
 
@@ -295,7 +296,7 @@ tags:
 
 #### F-4 ⚪ その他
 
-- `*.asc` は公開鍵（`KEYS.asc` など）まで無視します。
+- `*.asc` は公開鍵（`KEYS.asc` など）まで無視します。ただし秘密鍵の書き出しにも使われる拡張子のため、安全側に倒して無視を維持します（P0-1 で判断）。
 - `env/` と `out/` は範囲が広すぎるため、アンカーを付けます。
 
 ### G. ドキュメントの整合性
@@ -375,7 +376,7 @@ tags:
   - `naming-rules-general.md` §6 は「小文字・数字・ハイフン・ドットのみ」と定めています。しかしこれは、Python のモジュールや `__init__.py`、pytest がテストを見つける規則（`test_*.py`）と衝突します。Dart（snake_case 必須）、C#（PascalCase）、Go（`_test.go`）、Rust（snake_case のモジュール）とも衝突します。
   - `tests/test-permission-guard.py:8` 自身が、「ハイフンを含む名前のため unittest の自動発見で import できない」と注記しています。
   - 一方、`validate-filenames.py` はこの規則を実装しておらず（空白だけを検査）、`ALLOWED_ROOT_UPPERCASE`（`:40`）は定義されているだけで使われていません。
-- **対応**: 汎用規則の適用範囲を、`.agents/`・`docs/`・`scripts/` などソースコード以外の領域に限定し、ソースコードの命名は言語ルールに委ねます。適用範囲内の規則は実装してテストし、Python のテストは `test_*.py` に改名します。
+- **対応（決定 #7）**: 汎用規則の適用範囲を、`.agents/`・`docs/`・`scripts/` などソースコード以外の領域に限定し、ソースコードの命名は言語ルールに委ねます。適用範囲内の規則は実装してテストし、Python のテストは `test_*.py` に改名します。
 
 ---
 
@@ -393,23 +394,25 @@ tags:
 | :--- | :--- | :--- | :--- |
 | P0-1 | `.gitignore` の修正（`lib/`・`bin/`・`/pkg/`・`Makefile`・`Testing/` にアンカーを付けるか削除、ロックファイルを追跡対象に、`.claude/` 配下の `skills/`・`agents/`・`commands/` の例外を追加） | F-1〜F-4 | §2 の 15 パスで `git check-ignore` の結果が期待どおりになる |
 | P0-2 | PR テンプレートのフロントマターを削除。README の `$schema` を削除して `lang` に統一。`validate-frontmatter.py` に例外リストを追加 | G-1 | 新しい PR の本文に YAML が入らない |
-| P0-3 | 設定ファイルを YAML に一本化。`AUTHOR_EMAIL` の既定値を空にする（必須チェックは Phase 1） | A-1、A-3 | JSON が削除され、ドキュメントの「(or .json)」表記も更新されている |
+| P0-3 | 設定ファイルを YAML に一本化（JSON を削除）。A-3 は Copier 移行（P1-1）の質問と検証で解消する | A-1 | JSON が削除され、ドキュメントの「(or .json)」表記も更新されている |
 | P0-4 | すべてのワークフローに最小限の `permissions:` を追加 | D-1 | すべてのワークフローで権限が明示されている |
-| P0-5 | ガードの修正。`git config core.hooksPath`（`.githooks` 以外への設定）と `--unset` を N-04 で、ランナー経由の publish を N-10 で拒否する（テストを先に書く） | C-1、C-2 | 追加したテストが失敗から成功に変わり、既存の 21 件も成功する |
+| P0-5 | ガードの修正。`git config` による `core.hooksPath` の変更・削除を N-04 で、ランナー経由の publish を N-10 で拒否する（テストを先に書く）。ポリシー §5 に従い、各ツールの設定も同じ PR で更新する | C-1、C-2 | 追加したテストが失敗から成功に変わり、既存のテストもすべて成功する |
 | P0-6 | 文書の誤記修正（`make check`、Windsurf、`skills/languages`、ブランチ名、入れ子のフェンス）と `--markdown-linebreak-ext=md` の追加 | G-2（一部）、G-3、G-5、E-3 | リンク・パス検査で問題が 0 件 |
 
-### Phase 1: テンプレートとして正しく動かす（目安 1 週間）
+### Phase 1: Copier への移行とテンプレート自身の品質ゲート（目安 1〜2 週間）
+
+決定 #3 により、独自のテンプレートエンジン（`apply-template.py`）を改修する代わりに Copier へ移行します。A-1〜A-6、A-8、A-9、G-4 は、Copier の質問・検証・除外・更新の仕組みでまとめて解消します。
 
 | PR | 内容 | 対象 ID |
 | :--- | :--- | :--- |
-| P1-1 | `apply-template.py` に設定のスキーマ検証を追加（ユーザー名・URL・言語・SPDX・メール） | A-2、A-3 |
-| P1-2 | プレースホルダー検査を既知のキーに限定。finalize マニフェストを導入（検査フック・ワークフロー・保守用文書の削除、README の差し替え、CHANGELOG のリセット） | A-4、A-5、A-6、G-4 |
-| P1-3 | `LICENSE_TYPE` に応じてライセンス本文を選択 | A-2 |
-| P1-4 | スクリプト群のユニットテスト（pytest）と、ruff・mypy・shellcheck・actionlint・リンク検査を CI に追加。`validate-frontmatter.py` も CI で実行 | D-3、H-3 |
-| P1-5 | テンプレート適用の E2E テストを CI に追加（finalize まで含める）。`template-check.yml` を整理 | D-4、D-5 |
-| P1-6 | フックを一本化（推奨は pre-commit で、commit-msg も含める）。秘密の検出は gitleaks に任せる | E-1、E-2、E-4 |
+| P1-1 | Copier へ移行（ADR-0002 を書く）。`copier.yml` の質問と検証（GitHub ユーザー名・URL・メール・主言語・SPDX ライセンス）、回答に応じたライセンス本文の選択、テンプレート保守用ファイル（本書など）の除外。`apply-template.py`・`template.config.yaml`・`setup.sh` / `setup.ps1`・`template-check.yml`・プレースホルダー検査フックを廃止 | A-1〜A-6、A-8、A-9、G-4 |
+| P1-2 | `copier copy` と `copier update` の E2E テストを CI に追加（回答ファイルで生成 → 命名・フロントマター・CODEOWNERS を検査 → pre-commit を実行） | D-4、D-5 |
+| P1-3 | スクリプト群のユニットテスト（pytest）と、ruff・mypy・shellcheck・actionlint・リンク検査を CI に追加 | D-3、H-3 |
+| P1-4 | フックを pre-commit に一本化（決定 #2。commit-msg ステージも含める）。`.githooks/` と `install-hooks.py` を廃止し、秘密の検出は gitleaks に任せる | E-1、E-2、E-4 |
 
-**完了条件**: 「テンプレートから新規作成 → 適用 → finalize → 初回コミット → CI が緑」が、手作業での修正なしに通ること。
+**ADR-0002 で決めること**: テンプレート本体を `_subdirectory` に分けるか、ルートをそのままテンプレートにして保守用ファイルを `_exclude` で除くか。前者はテンプレートリポジトリ自身の README と CI を分けやすい一方、`.github/` や `.claude/` がテンプレート用と保守用の二重管理になります。後者は二重管理を避けられますが、置換が必要なファイルに `.jinja` 接尾辞を付ける必要があります。
+
+**完了条件**: 「`copier copy` で新規作成 → 初回コミット → CI が緑」が手作業での修正なしに通り、`copier update` でテンプレートの変更を派生リポジトリに取り込めること。
 
 ### Phase 2: AI 連携を実際に効かせる（目安 1〜2 週間）
 
@@ -427,28 +430,27 @@ tags:
 
 | PR | 内容 | 対象 ID |
 | :--- | :--- | :--- |
-| P3-1 | 言語資産を統合（45 ファイル → 9 ファイル程度）し、適用時に使わない言語を削除 | H-1、A-7 |
-| P3-2 | Actions の SHA 固定と zizmor の導入。Dependabot の設定を言語別に生成し、pre-commit の更新も対象にする | D-2、D-6 |
-| P3-3 | リリース自動化ツールを採用（ADR を書く）し、CHANGELOG を自動生成 | D-7 |
+| P3-1 | 言語資産を統合（45 ファイル → 9 ファイル程度）。全 9 言語は維持する（決定 #4） | H-1 |
+| P3-2 | Actions の SHA 固定と zizmor の導入。Dependabot の設定を Copier の回答（主言語）に応じて生成し、pre-commit の更新も対象にする | D-2、D-6 |
+| P3-3 | release-please を導入（決定 #5）。`release.yml` を置き換え、CHANGELOG を自動生成 | D-7 |
 | P3-4 | ルールセットの JSON と適用手順を提供 | D-8 |
-| P3-5 | テンプレート更新の伝播方式（Copier など）の ADR と実装 | A-8 |
-| P3-6 | 命名規則の適用範囲を見直して実装し、Python のテストを改名 | I-1 |
-| P3-7 | Python の最小バージョンを 3.10 に。複数 OS・複数バージョンで CI を実行し、CI バッジを置き換え、gitleaks のライセンス条件を明記 | D-9 |
-| P3-8 | その他の検討事項（タグ push の扱い、他ツールへのガード接続、モード制限）を判断して ADR-0001 に反映 | C-7 |
+| P3-5 | 命名規則をソースコード以外の領域に限定して実装し（決定 #7）、Python のテストを `test_*.py` に改名 | I-1 |
+| P3-6 | Python の最小バージョンを 3.10 に。複数 OS・複数バージョンで CI を実行し、CI バッジを置き換え、gitleaks のライセンス条件を明記 | D-9 |
+| P3-7 | タグ push の扱いと、他ツールへのガード接続を検討（モード制限は決定 #6 で決着済み） | C-7 |
 
 ---
 
-## 5. 判断が必要な事項
+## 5. 判断事項と決定（2026-10-01）
 
-| # | 論点 | 選択肢 | 推奨 |
+| # | 論点 | 決定 | 計画への反映 |
 | :--- | :--- | :--- | :--- |
-| 1 | 設定ファイルの形式 | YAML のみ / JSON のみ / 両方を残して同期を検査 | YAML のみ（コメントを書け、現状も優先されている） |
-| 2 | Git フックの体系 | pre-commit フレームワーク / `.githooks` / 併用（委譲） | pre-commit（gitleaks と更新の仕組みが揃い、Python も既に前提になっている） |
-| 3 | テンプレートの方式 | 現行スクリプトを継続 / Copier に移行 / cookiecutter | Copier（派生リポジトリへ更新を伝播できる。A-8） |
-| 4 | 言語資産の扱い | 適用時に削減 / 全言語を維持 | 削減（複数言語のプロジェクトはリストで指定） |
-| 5 | リリース自動化 | release-please / semantic-release / git-cliff / 手動のまま | release-please（Conventional Commits を前提にでき、追加のランタイムが不要） |
-| 6 | Claude Code のモード制限 | `disableAutoMode`・`allowUnsandboxedCommands` を設定する / しない | 判断理由を ADR-0001 に追記したうえで決める |
-| 7 | 命名規則の適用範囲 | 全ファイル / ソースコード以外の領域のみ | ソースコード以外の領域のみ |
+| 1 | 設定ファイルの形式 | YAML のみ | P0-3 で JSON を削除。Copier 移行後は `copier.yml`（YAML）に置き換わる |
+| 2 | Git フックの体系 | pre-commit フレームワーク | P1-4 で `.githooks/` と `install-hooks.py` を廃止 |
+| 3 | テンプレートの方式 | Copier | Phase 3 から Phase 1 に前倒し（P1-1）。独自エンジンの改修（旧 P1-1〜P1-3、旧 P1-5）は行わない |
+| 4 | 言語資産の扱い | 全言語を維持 | A-7 は対応しない。H-1 は重複の統合だけを行う |
+| 5 | リリース自動化 | release-please | P3-3 |
+| 6 | Claude Code のモード制限 | `disableAutoMode`・`allowUnsandboxedCommands` を設定しない | 理由と影響（ルールに該当しない操作は auto mode では分類器が判定する）を ADR-0001 の追記に記録 |
+| 7 | 命名規則の適用範囲 | ソースコード以外の領域のみ | P3-5 |
 
 ---
 
@@ -457,14 +459,14 @@ tags:
 | ID | 重大度 | 概要 | フェーズ |
 | :--- | :--- | :--- | :--- |
 | A-1 | 🟠 | 設定ファイルの二重管理と値の食い違い | P0 |
-| A-2 | 🟠 | 設定値の検証がなく、ライセンス本文が固定 | P1 |
-| A-3 | 🟠 | 脆弱性の報告先がダミーアドレス | P0 / P1 |
-| A-4 | 🔴 | プレースホルダー検査の誤検知でコミットが止まる | P1 |
-| A-5 | 🟡 | finalize の後片付けが不完全 | P1 |
-| A-6 | 🟡 | テンプレート自身の README が未置換表示 | P1 |
-| A-7 | 🟡 | 全言語の資産が派生プロジェクトに残る | P3 |
-| A-8 | 🟡 | テンプレート更新を伝播できない | P3 |
-| A-9 | ⚪ | `*.egg-info` の除外が効かない、setup スクリプトの挙動差 | P1 |
+| A-2 | 🟠 | 設定値の検証がなく、ライセンス本文が固定 | P1（Copier） |
+| A-3 | 🟠 | 脆弱性の報告先がダミーアドレス | P1（Copier） |
+| A-4 | 🔴 | プレースホルダー検査の誤検知でコミットが止まる | P1（Copier） |
+| A-5 | 🟡 | finalize の後片付けが不完全 | P1（Copier） |
+| A-6 | 🟡 | テンプレート自身の README が未置換表示 | P1（Copier） |
+| A-7 | 🟡 | 全言語の資産が派生プロジェクトに残る | 対応しない（決定 #4） |
+| A-8 | 🟡 | テンプレート更新を伝播できない | P1（Copier） |
+| A-9 | ⚪ | `*.egg-info` の除外が効かない、setup スクリプトの挙動差 | P1（Copier で廃止） |
 | B-1 | 🔴 | スキルとコマンドが Claude Code から見えない | P0 / P2 |
 | B-2 | 🟠 | `AGENTS.md` がない | P2 |
 | B-3 | 🟠 | 指示ファイルの重複と食い違い | P2 |
@@ -476,7 +478,7 @@ tags:
 | C-4 | 🟡 | `gh api` による破壊的操作を検出しない | P2 |
 | C-5 | 🟡 | Windows でガードが fail-open | P2 |
 | C-6 | 🟡 | 6 形式の手作業同期によるドリフト | P2 |
-| C-7 | ⚪ | タグ push、他ツールのフック、モード制限 | P3 |
+| C-7 | ⚪ | タグ push、他ツールのフック、モード制限 | P3（モード制限は決定 #6 で決着） |
 | D-1 | 🟠 | ワークフローの権限が明示されていない | P0 |
 | D-2 | 🟠 | Actions が SHA で固定されていない | P3 |
 | D-3 | 🟠 | スクリプトのテスト・lint・型検査がない | P1 |
@@ -497,7 +499,7 @@ tags:
 | G-1 | 🟠 | フロントマターが PR 本文や README を汚す | P0 |
 | G-2 | 🟠 | 実在しない機能やパスへの言及 | P0 / 各フェーズ |
 | G-3 | 🟡 | ブランチ名の規則が一致しない | P0 |
-| G-4 | 🟡 | 日付・履歴のメタデータが引き継がれる | P1 |
+| G-4 | 🟡 | 日付・履歴のメタデータが引き継がれる | P1（Copier） |
 | G-5 | 🟡 | コードフェンスの入れ子が崩れる | P0 |
 | G-6 | ⚪ | 取り込み漏れ、言語方針、ラベルの準備 | P2 |
 | H-1 | 🟡 | 言語別資産の大量重複 | P3 |
