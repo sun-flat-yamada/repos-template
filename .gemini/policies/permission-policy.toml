@@ -56,7 +56,7 @@ toolName = "run_shell_command"
 commandRegex = 'git\s[^"&;|]*\bpush\b[^"&;|]*\s(--force\S*|--mirror|--delete|--prune|-[A-Za-z]*[fd][A-Za-z]*\b|[+:][^\s"\\])'
 decision = "deny"
 priority = 900
-denyMessage = "N-05: force push and remote ref deletion are never allowed."
+denyMessage = "N-05: force push and remote ref deletion are never allowed. Gemini policies cannot express the C-HITL-01 lease condition, so every --force-with-lease form stays denied."
 
 [[rule]]
 toolName = "run_shell_command"

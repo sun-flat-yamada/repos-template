@@ -37,8 +37,8 @@ prefix_rule(
 prefix_rule(
     pattern = ["git", "push", ["--force", "-f", "--force-with-lease", "--force-if-includes", "--mirror", "--delete", "-d", "--prune"]],
     decision = "forbidden",
-    justification = "N-05: force push and remote ref deletion are never allowed. Push a new commit instead.",
-    match = ["git push --force", "git push -f origin feat/x", "git push --delete origin feat/old"],
+    justification = "N-05: force push and remote ref deletion are never allowed. Codex cannot express the C-HITL-01 lease condition, so every lease form stays forbidden here. Push a new commit instead.",
+    match = ["git push --force", "git push -f origin feat/x", "git push --delete origin feat/old", "git push --force-with-lease origin feat/x"],
     not_match = ["git push origin feat/x"],
 )
 

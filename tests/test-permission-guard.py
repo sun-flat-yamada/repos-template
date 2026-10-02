@@ -247,6 +247,72 @@ class NeverCommandTests(unittest.TestCase):
                 self.assertEqual(decision_of(command), "deny")
 
 
+SHA = "0123456789abcdef0123456789abcdef01234567"
+LEASE = f"--force-with-lease=feat/x:{SHA} --force-if-includes"
+
+
+class ForceWithLeaseTests(unittest.TestCase):
+    """N-05 / C-HITL-01: only an explicit, include-checked lease on a feature branch may be approved."""
+
+    ASK = [
+        f"git push {LEASE} origin feat/x",
+        f"git push origin feat/x {LEASE}",
+        f"git push --force-if-includes --force-with-lease=feat/x:{SHA[:7]} origin feat/x",
+        f"git -C . push {LEASE} origin feat/x",
+        f"git -c push.default=current push {LEASE} origin feat/x",
+        f'bash -c "git push {LEASE} origin feat/x"',
+        f"env FOO=1 git push {LEASE} origin feat/x",
+        f"git push --force-with-lease=claude/work:{SHA} --force-if-includes -u origin claude/work",
+        f"git push --force-with-lease=refs/heads/feat/x:{SHA} --force-if-includes origin refs/heads/feat/x",
+    ]
+    DENY_N05 = [
+        "git push origin feat/x --force-with-lease",
+        "git push --force-with-lease --force-if-includes origin feat/x",
+        f"git push --force-with-lease=feat/x --force-if-includes origin feat/x",
+        f"git push --force-with-lease=feat/x: --force-if-includes origin feat/x",
+        f"git push --force-with-lease=feat/x:nothex --force-if-includes origin feat/x",
+        f"git push --force-with-lease=feat/x:{SHA} origin feat/x",
+        f"git push --force-if-includes origin feat/x",
+        f"git push {LEASE} --force origin feat/x",
+        f"git push {LEASE} -f origin feat/x",
+        f"git push {LEASE} origin +feat/x",
+        f"git push {LEASE} origin feat/x:feat/y",
+        f"git push {LEASE} origin :feat/x",
+        f"git push {LEASE} --delete origin feat/x",
+        f"git push {LEASE} --mirror origin",
+        f"git push {LEASE} --prune origin feat/x",
+        f"git push {LEASE} origin feat/other",
+        f"git push {LEASE} origin",
+        f"git push {LEASE} origin feat/x feat/y",
+        f"git push --force-with-lease=feat/x:{SHA} --force-with-lease=feat/y:{SHA} --force-if-includes origin feat/x",
+    ]
+    DENY_N08 = [
+        f"git push --force-with-lease=main:{SHA} --force-if-includes origin main",
+        f"git push --force-with-lease=main:{SHA} --force-if-includes origin feat/x:main",
+        f"git push --force-with-lease=refs/heads/master:{SHA} --force-if-includes origin refs/heads/master",
+        f"git push --force-with-lease=release/1.0:{SHA} --force-if-includes origin release/1.0",
+        f"git push --force-with-lease=feat/x:{SHA} --force-if-includes origin HEAD:main",
+    ]
+
+    def test_explicit_lease_on_feature_branch_requires_approval(self):
+        for command in self.ASK:
+            with self.subTest(command=command):
+                self.assertEqual(decision_of(command), "ask")
+                self.assertEqual(rule_of(command), "C-HITL-01")
+
+    def test_incomplete_or_unsafe_lease_is_denied(self):
+        for command in self.DENY_N05:
+            with self.subTest(command=command):
+                self.assertEqual(decision_of(command), "deny")
+                self.assertEqual(rule_of(command), "N-05")
+
+    def test_protected_branch_is_denied_even_with_lease(self):
+        for command in self.DENY_N08:
+            with self.subTest(command=command):
+                self.assertEqual(decision_of(command), "deny")
+                self.assertEqual(rule_of(command), "N-08")
+
+
 class AskCommandTests(unittest.TestCase):
     """C-HITL actions are normalized to an approval prompt."""
 
@@ -442,7 +508,7 @@ class PolicyConfigurationTests(unittest.TestCase):
         settings = self.load_json(".claude/settings.json")
         permissions = settings["permissions"]
         self.assertEqual(permissions["disableBypassPermissionsMode"], "disable")
-        for rule in ("Read(.env)", "Read(~/.ssh/**)", "Bash(sudo *)", "Bash(git push --force*)", "Bash(npm publish*)"):
+        for rule in ("Read(.env)", "Read(~/.ssh/**)", "Bash(sudo *)", "Bash(git push --force)", "Bash(git push * --force *)", "Bash(npm publish*)"):
             with self.subTest(rule=rule):
                 self.assertIn(rule, permissions["deny"])
         self.assertIn("Bash(git push *)", permissions["ask"])

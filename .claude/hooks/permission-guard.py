@@ -462,15 +462,43 @@ def is_protected_ref(refspec: str) -> bool:
     return destination in PROTECTED_BRANCHES or bool(RELEASE_BRANCH.match(destination))
 
 
+LEASE_PREFIX = "--force-with-lease"
+LEASE_EXPECTATION = re.compile(r"^--force-with-lease=(?P<branch>[^:=\s]+):[0-9a-f]{7,64}$")
+FORCE_PUSH_FLAGS = frozenset({"--force", "-f", "--mirror", "--delete", "-d", "--prune"})
+
+
+def branch_name(ref: str) -> str:
+    return ref[len("refs/heads/"):] if ref.startswith("refs/heads/") else ref
+
+
+def is_safe_force_with_lease(args: List[str], refspecs: List[str]) -> bool:
+    """True for exactly one `--force-with-lease=<branch>:<sha>` plus `--force-if-includes`
+    that rewrites only that same branch (a bare name, no `+`, `:`, or extra refs)."""
+    leases = [a for a in args if a == LEASE_PREFIX or a.startswith(LEASE_PREFIX + "=")]
+    expectation = LEASE_EXPECTATION.match(leases[0]) if len(leases) == 1 else None
+    if not expectation or "--force-if-includes" not in args or len(refspecs) != 1:
+        return False
+    return branch_name(refspecs[0]) == branch_name(expectation.group("branch"))
+
+
 def check_git_push(args: List[str]) -> Decision:
-    force = {"--force", "-f", "--force-with-lease", "--force-if-includes", "--mirror", "--delete", "-d", "--prune"}
     refspecs = push_refspecs(args)
-    rewrites_remote = any(a in force or a.startswith("--force-with-lease=") for a in args)
+    uses_lease = "--force-if-includes" in args or any(a.startswith(LEASE_PREFIX) for a in args)
+    rewrites_remote = any(a in FORCE_PUSH_FLAGS for a in args)
     rewrites_remote = rewrites_remote or has_short_flag(args, "f") or has_short_flag(args, "d")
     if rewrites_remote or any(ref.startswith(("+", ":")) for ref in refspecs):
         return finding(DENY, "N-05", "Force push and remote ref deletion are never allowed.")
-    if any(is_protected_ref(ref) for ref in refspecs):
+    lease_branches = [a.split("=", 1)[1].rsplit(":", 1)[0] for a in args if a.startswith(LEASE_PREFIX + "=")]
+    if any(is_protected_ref(ref) for ref in refspecs + lease_branches):
         return finding(DENY, "N-08", "Pushing directly to a protected branch is never allowed; open a pull request.")
+    if uses_lease:
+        if not is_safe_force_with_lease(args, refspecs):
+            return finding(
+                DENY, "N-05",
+                "Only `--force-with-lease=<branch>:<sha> --force-if-includes <remote> <branch>` "
+                "on a feature branch may be approved.",
+            )
+        return finding(ASK, "C-HITL-01", "Force push with an explicit lease on a feature branch requires human approval.")
     return finding(ASK, "C-HITL-01", "`git push` requires human approval.")
 
 

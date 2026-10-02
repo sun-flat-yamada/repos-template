@@ -109,11 +109,11 @@ tags:
 | **C-SBX** サンドボックス内のみ | ビルド・テスト・Lint、ロックファイル準拠のインストール、`git add`/`commit` | 人間の承認（C-HITL） |
 | **C-NET** 許可リストの宛先のみ | パッケージレジストリ、公式ドキュメント | 人間の承認。流出先・メタデータは禁止（N-09） |
 | **C-SCOPE** スコープ限定 | ワークスペース外の読み取りは人間が追加したディレクトリのみ。pushは保護されていないブランチのみ。クラウド操作は開発・ステージングのみ | 禁止（N-07 / N-08）または承認 |
-| **C-HITL** 都度の人間承認 | push・PR・Issue、依存関係の変更、再帰削除・`reset --hard`、シェルからのネットワーク、AI/CI/ガバナンス設定の編集、コンテナ・クラウド・DBクライアント、サンドボックス外実行、MCP、環境変数の全出力 | 実行しない |
+| **C-HITL** 都度の人間承認 | push（強制pushは `git push --force-with-lease=<branch>:<sha> --force-if-includes <remote> <branch>` の形のみ。ADR-0002）・PR・Issue、依存関係の変更、再帰削除・`reset --hard`、シェルからのネットワーク、AI/CI/ガバナンス設定の編集、コンテナ・クラウド・DBクライアント、サンドボックス外実行、MCP、環境変数の全出力 | 実行しない |
 
 ### N — いかなる場合も禁止
 
-N-01 秘密情報へのアクセス／N-02 秘密情報の書き込み・漏えい／N-03 権限昇格・ホストの改変と永続化／N-04 ガードレールの無効化（バイパスモード、`--no-verify`、全自動承認設定）／N-05 不可逆な破壊（ルート・ホーム削除、強制push、リモート参照削除）／N-06 ダウンロードしたコードの実行／N-07 本番・共有インフラの変更／N-08 自己承認・保護ブランチへの直接push／N-09 外部流出経路（トンネル、リバースシェル、ペーストサービス、メタデータ）／N-10 パッケージ・イメージ・リリースの公開／N-11 コンテナエスケープ。
+N-01 秘密情報へのアクセス／N-02 秘密情報の書き込み・漏えい／N-03 権限昇格・ホストの改変と永続化／N-04 ガードレールの無効化（バイパスモード、`--no-verify`、全自動承認設定）／N-05 不可逆な破壊（ルート・ホーム削除、強制push、リモート参照削除。例外として、sha と `--force-if-includes` を明示した `--force-with-lease` を保護されていないブランチへ使う形のみ C-HITL-01）／N-06 ダウンロードしたコードの実行／N-07 本番・共有インフラの変更／N-08 自己承認・保護ブランチへの直接push／N-09 外部流出経路（トンネル、リバースシェル、ペーストサービス、メタデータ）／N-10 パッケージ・イメージ・リリースの公開／N-11 コンテナエスケープ。
 
 ---
 
@@ -130,7 +130,7 @@ N-01 秘密情報へのアクセス／N-02 秘密情報の書き込み・漏え�
 | `permissions.blockReadsOutsideWorkingDirectories` | ワークスペース外の読み取りは `/add-dir` で追加したディレクトリのみ | C-SCOPE-01 |
 | `enableAllProjectMcpServers: false` | `.mcp.json` のサーバーを一括承認しない | C-HITL-07 |
 | `sandbox` | Bashをサンドボックス化。ネットワークはレジストリのみ、トークン系の環境変数を除去。`credentials.files` と `filesystem.denyRead` で資格情報ディレクトリと代表的な `.env.*` をリテラルパスでも保護 | C-SBX、C-NET、N-01 |
-| `hooks.PreToolUse` | `permission-guard.py` が `git -C . push --force`、`bash -c "…"`、`xargs sudo …` などの表記ゆれを正規化して N を拒否、C-HITL を確認要求に | N、C-HITL |
+| `hooks.PreToolUse` | `permission-guard.py` が上記の lease 形だけを C-HITL-01（ask）に落とし、裸の lease・sha なし・`--force-if-includes` なし・保護ブランチ宛て・追加 refspec を拒否。さらに `git -C . push --force`、`bash -c "…"`、`xargs sudo …` などの表記ゆれを正規化して N を拒否、C-HITL を確認要求に | N、C-HITL |
 
 **導入と確認**
 
@@ -146,6 +146,7 @@ N-01 秘密情報へのアクセス／N-02 秘密情報の書き込み・漏え�
 - `.codex/rules/permission-policy.rules`: N を `forbidden`、C-HITL を `prompt` で定義。`allow` は「サンドボックス外で無確認実行」になるため使用しません。
 - **導入**: Codexでプロジェクトを trusted にすると両ファイルが読み込まれます。
 - **検証**: `codex execpolicy check --rules .codex/rules/permission-policy.rules git push --force` → `"decision":"forbidden"`。ルール内の `match`/`not_match` は読み込み時に自己テストされます。
+- **強制push**: 条件（sha・`--force-if-includes`・ブランチ種別）を表現できないため、`--force-with-lease` を含む全形を `forbidden` のまま維持します（ポリシーより厳しい側）。
 - **限界**: プレフィックス一致のため、フラグが後ろにある形は捕捉しません（サンドボックスが後ろ盾）。`workspace-write` は読み取りを制限しないため、N-01 を厳格に守るにはdevcontainer等で資格情報をマウントしない運用を併用してください。ネットワークは全許可か全拒否のため、レジストリ通信は承認要求になります（C-NET より厳しい側に倒しています）。
 
 ### 5.3 Gemini CLI / Google Antigravity
@@ -159,6 +160,7 @@ N-01 秘密情報へのアクセス／N-02 秘密情報の書き込み・漏え�
   cp .gemini/policies/permission-policy.toml ~/.gemini/policies/
   ```
 
+- **強制push**: 正規表現では lease の条件を安全に表せないため、`--force*` を `deny` のまま維持し、`--force-with-lease` も拒否されます（ポリシーより厳しい側）。
 - **注意**: Gemini は ReDoS 対策として「閉じ括弧の直後に量指定子がある正規表現」（`)?` など）を含むルールを読み込み時に破棄します。ルールを追加する際は `(x|)` のような代替表記を使ってください。
 - **Antigravity**: ファイルベースの権限設定がないため、UIのターミナル実行ポリシーを「承認を求める」にし、許可/拒否リストへ本ポリシーの A / N を反映します。Turbo（自動実行）は隔離環境でのみ使用してください。
 
@@ -166,7 +168,7 @@ N-01 秘密情報へのアクセス／N-02 秘密情報の書き込み・漏え�
 
 - `.cursor/cli.json`（Cursor CLI）: `allow` に読み取り・読み取り専用git・ソース系ディレクトリへの書き込み・公式ドキュメント、`deny` に N と AI/CI設定への書き込みを列挙。
 - `.cursor/permissions.json`（IDE）: 端末の自動実行許可を読み取り専用コマンドに限定し、MCPの自動実行を空リストで無効化。`autoRun` の自然言語指示で自動レビュー分類器を誘導します（強制力はありません）。
-- **限界**: Cursor CLI には ask リストがなく、許可されていない操作は都度確認になります。否定パターンもないため `.env.example` も読み取り拒否、AI/CI設定の編集は確認ではなく拒否（いずれもポリシーより厳しい側）です。
+- **限界**: Cursor CLI には ask リストがなく、許可されていない操作は都度確認になります。`--force-with-lease` を含む強制pushは条件を表せないため全形を拒否します。否定パターンもないため `.env.example` も読み取り拒否、AI/CI設定の編集は確認ではなく拒否（いずれもポリシーより厳しい側）です。
 
 ### 5.5 GitHub Copilot（VS Code）と Copilot coding agent
 
@@ -203,6 +205,10 @@ python -c "import tomllib,sys; [tomllib.load(open(p,'rb')) for p in sys.argv[1:]
 # フックの動作確認（deny の JSON が出力されること）
 echo '{"tool_name":"Bash","tool_input":{"command":"git -C . push --force"}}' | python .claude/hooks/permission-guard.py
 
+# lease 形の確認（ask になること。sha なしの裸の lease は deny）
+echo '{"tool_name":"Bash","tool_input":{"command":"git push --force-with-lease=feat/x:0123456 --force-if-includes origin feat/x"}}' | python .claude/hooks/permission-guard.py
+echo '{"tool_name":"Bash","tool_input":{"command":"git push --force-with-lease origin feat/x"}}' | python .claude/hooks/permission-guard.py
+
 # Codex ルールの確認
 codex execpolicy check --rules .codex/rules/permission-policy.rules git push origin main
 ```
@@ -216,6 +222,7 @@ codex execpolicy check --rules .codex/rules/permission-policy.rules git push ori
 - **Linux のサンドボックスは glob を解釈しない**: `Read(**/*.pem)` などのglobルールはファイルツールには効きますが、サンドボックス内のシェルには効きません。リテラルパス（`~/.ssh`、`~/.aws` など）とガードフックで補っています。プロジェクト内に秘密鍵を置かないことが前提です。
 - **テスト実行は任意コード実行と等価**: エージェントが編集したテストやビルドスクリプトを実行するため、サンドボックスがない環境（ネイティブWindows、bubblewrap未導入のLinux）では毎回承認になります。
 - **許可ドメイン経由の流出**: レジストリやGitHubなど広いドメインへの通信は、アップロードやドメインフロンティングに悪用される余地があります。許可リストは最小限に保ってください。
+- **`--force-with-lease` の限界**: lease はリモート追跡 ref が「最後に見た状態」かだけを確認するため、バックグラウンドの `fetch` で追跡 ref が進むと未確認コミットがあっても通ります。そのため sha の明示と `--force-if-includes` を必須にし、承認者が sha を確認します（ADR-0002）。
 - **ツールごとの表現力の差**: Codex はフラグ位置を問わない一致ができず、Cursor CLI には ask がなく、VS Code の `false` は承認止まり、Gemini のワークスペースポリシーは無効です（各節の「限界」を参照）。
 
 ---
