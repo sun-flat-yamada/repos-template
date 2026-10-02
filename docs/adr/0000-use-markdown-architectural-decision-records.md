@@ -4,7 +4,7 @@ description: "Adoption of Michael Nygard-style Markdown Architectural Decision R
 category: "adr"
 type: "decision-record"
 status: "accepted"
-date: "{CURRENT_YEAR}-09-20"
+date: "{CURRENT_DATE}"
 updated: 2026-09-21
 lang: "en"
 tags:
@@ -16,7 +16,7 @@ tags:
 
 # 0. Record Architecture Decisions
 
-Date: {CURRENT_YEAR}-09-20
+Date: {CURRENT_DATE}
 
 ## Status
 

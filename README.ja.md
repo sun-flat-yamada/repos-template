@@ -12,9 +12,9 @@ compatibility:
   tools: ["google-antigravity", "claude-code", "github-copilot", "gemini-cli"]
 tags: ["template", "ai-sdlc", "governance", "security", "documentation"]
 author: "@{AUTHOR_GITHUB}"
-date: "{CURRENT_YEAR}-09-20"
-updated: "{CURRENT_YEAR}-09-21"
-last_reviewed: "{CURRENT_YEAR}-09-21"
+date: "{CURRENT_DATE}"
+updated: "{CURRENT_DATE}"
+last_reviewed: "{CURRENT_DATE}"
 ---
 
 # {PROJECT_NAME}
