@@ -28,11 +28,16 @@ jobs:
 
       - name: Syntax & Compilation Check
         run: |
-          python -m py_compile scripts/apply-template.py scripts/install-hooks.py scripts/validate-filenames.py scripts/validate-frontmatter.py scripts/verify-fork-health.py .claude/hooks/permission-guard.py
+          python -m py_compile scripts/apply-template.py scripts/install-hooks.py scripts/validate-filenames.py scripts/validate-frontmatter.py scripts/sync-upstream.py scripts/worktree-manage.py scripts/verify-fork-health.py .claude/hooks/permission-guard.py
 
       - name: AI Permission Policy Tests
         run: |
           python tests/test-permission-guard.py -v
+
+      - name: Upstream Sync & Worktree Tests
+        run: |
+          python tests/test-sync-upstream.py -v
+          python tests/test-worktree-manage.py -v
 
       - name: Fork Health Script Tests
         run: |

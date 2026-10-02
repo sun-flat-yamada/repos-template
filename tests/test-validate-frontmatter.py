@@ -75,13 +75,19 @@ class ValidateMarkdownTests(unittest.TestCase):
                 self.assertEqual(validator.frontmatter_required(Path(rel_path)), required)
 
 
+class UpstreamSnapshotTests(unittest.TestCase):
+    def test_snapshot_paths_are_exempt(self) -> None:
+        self.assertTrue(validator.is_upstream_snapshot(Path(".agents/upstream/x/.agents/rules/a.md")))
+        self.assertFalse(validator.is_upstream_snapshot(Path(".agents/rules/a.md")))
+
+
 class RepositoryTests(unittest.TestCase):
     """Every markdown file shipped in the repository passes the validator."""
 
     def test_repository_markdown_passes(self):
         for file_path in sorted(REPO_ROOT.rglob("*.md")):
             rel_path = file_path.relative_to(REPO_ROOT)
-            if ".git" in rel_path.parts:
+            if ".git" in rel_path.parts or validator.is_upstream_snapshot(rel_path):
                 continue
             with self.subTest(path=rel_path.as_posix()):
                 self.assertEqual(validator.validate_markdown_frontmatter(file_path, rel_path), [])
