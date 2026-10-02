@@ -94,7 +94,7 @@ python scripts/install-hooks.py
 | **Claude Code** | [`CLAUDE.md`](CLAUDE.md) | Slash commands (`/status`, `/test`, `/review`, `/plan`) and governance rules |
 | **Google Antigravity** | [`.gemini/GEMINI.md`](.gemini/GEMINI.md) & `.agents/` | Two-phase governance, autonomous skill loading, agent roles |
 | **GitHub Copilot** | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) | Architectural standards and context hierarchy enforcement |
-| **Cursor / Windsurf** | [`.cursorrules`](.cursorrules) | Editor-level inline intelligence and rules adherence |
+| **Cursor** | [`.cursorrules`](.cursorrules) | Editor-level inline intelligence and rules adherence |
 | **OpenAI Codex CLI** | [`.codex/config.toml`](.codex/config.toml) | Sandbox, approval policy, and execution rules for the permission tiers |
 
 ---

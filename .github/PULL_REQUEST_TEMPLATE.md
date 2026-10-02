@@ -20,7 +20,7 @@ Fixes #(issue)
 <!-- Describe the tests you ran to verify your changes. Include steps so others can reproduce. -->
 
 - [ ] Automated unit/integration tests pass locally
-- [ ] Linter/formatter checks pass (`make check` or equivalent)
+- [ ] Linter/formatter checks pass (see the verification commands in `CONTRIBUTING.md`)
 - [ ] Zero secret leaks or unintended tokens in code or commit history
 - [ ] Manual testing performed:
   <!-- Describe manual test results -->

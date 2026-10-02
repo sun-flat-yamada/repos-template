@@ -6,7 +6,7 @@ category: rules
 type: specification
 status: active
 date: 2026-09-20
-updated: 2026-09-21
+updated: 2026-10-02
 lang: en
 tags:
 - rules
@@ -98,6 +98,6 @@ All files and directories in this repository must strictly adhere to the followi
 ## 7. Automated Verification & Enforcement
 
 All commits and pull requests are automatically validated against these conventions:
-- **Local Validation**: Run `python scripts/validate-filenames.py` (or `make check-names`).
+- **Local Validation**: Run `python scripts/validate-filenames.py`.
 - **Pre-commit Hook**: Installed via `python scripts/install-hooks.py` or `.pre-commit-config.yaml`.
 - **CI Enforcement**: Enforced on every PR via GitHub Actions (`ci.yml`).

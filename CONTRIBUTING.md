@@ -5,7 +5,7 @@ category: "governance"
 type: "guidelines"
 status: "active"
 date: 2026-09-20
-updated: 2026-09-21
+updated: 2026-10-02
 lang: "en"
 tags:
   - "contributing"
@@ -34,7 +34,7 @@ We follow a feature branch workflow paired with **Conventional Commits**:
 1. **Fork & Branch**:
    - Fork `{REPOSITORY_URL}` and create a dedicated branch:
      ```bash
-     git checkout -b feature/my-enhancement
+     git checkout -b feat/my-enhancement
      ```
 2. **Setup Environment & Hooks**:
    - Install local Git hooks to ensure secret leaks and formatting issues are caught before committing:
@@ -45,12 +45,12 @@ We follow a feature branch workflow paired with **Conventional Commits**:
    - Write tests that capture expected behavior before or alongside implementation.
    - Adhere to the general coding principles in `.agents/rules/coding-rules-general.md` and specific language rules in `.agents/rules/languages/`.
 4. **Run Pre-Commit Verification**:
-   - Ensure zero unresolved placeholders, strict adherence to file naming rules, and pass all linter checks:
+   - Ensure zero unresolved placeholders, strict adherence to file naming rules and front-matter standards, and pass all tests and linter checks:
      ```bash
-     make check
-     # Or run individually:
      python scripts/apply-template.py --check
      python scripts/validate-filenames.py
+     python scripts/validate-frontmatter.py   # requires PyYAML
+     python tests/test-permission-guard.py
      ```
 5. **Commit Message Conventions**:
    - Commit messages must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:

@@ -5,7 +5,7 @@ category: "workflow"
 type: "sop"
 status: "active"
 date: 2026-09-20
-updated: 2026-09-21
+updated: 2026-10-02
 lang: "en"
 tags:
   - "workflow"
@@ -28,7 +28,7 @@ This SOP outlines the end-to-end workflow for transforming human user requiremen
 ---
 
 ## Phase 2: Test-Driven Development (TDD)
-1. **Red Phase**: Write unit or integration tests verifying acceptance criteria using the target language toolchain skill (`.agents/skills/languages/`).
+1. **Red Phase**: Write unit or integration tests verifying acceptance criteria using the target language toolchain skill (`.agents/skills/toolchain-<lang>/`).
 2. **Confirm Failure**: Execute test runner and verify it fails with the expected assertion error.
 
 ---
