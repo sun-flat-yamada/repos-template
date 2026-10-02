@@ -58,6 +58,22 @@ prefix_rule(
 )
 
 prefix_rule(
+    pattern = ["git", "config", ["core.hooksPath", "core.hookspath"]],
+    decision = "forbidden",
+    justification = "N-04: changing core.hooksPath disables the repository's git hooks.",
+    match = ["git config core.hooksPath /dev/null"],
+    not_match = ["git config user.name dev"],
+)
+
+prefix_rule(
+    pattern = ["git", "config", ["--local", "--global", "--system", "--worktree", "--unset", "--unset-all", "--add", "--replace-all", "set", "unset"], ["core.hooksPath", "core.hookspath"]],
+    decision = "forbidden",
+    justification = "N-04: changing core.hooksPath disables the repository's git hooks.",
+    match = ["git config --unset core.hooksPath", "git config --global core.hooksPath /tmp/hooks"],
+    not_match = ["git config --global user.name dev"],
+)
+
+prefix_rule(
     pattern = ["git", "commit", "-n"],
     decision = "forbidden",
     justification = "N-04: `git commit -n` skips hooks and is never allowed.",
@@ -179,6 +195,30 @@ prefix_rule(
     pattern = [["twine"], ["upload"]],
     decision = "forbidden",
     justification = "N-10: publishing packages is done by CI.",
+)
+
+prefix_rule(
+    pattern = [["uv", "poetry", "pdm", "hatch", "pipx"], "run", "twine", "upload"],
+    decision = "forbidden",
+    justification = "N-10: publishing packages through a runner is still done by CI.",
+    match = ["uv run twine upload dist/pkg.whl", "poetry run twine upload dist/pkg.whl"],
+    not_match = ["uv run pytest"],
+)
+
+prefix_rule(
+    pattern = ["uvx", "twine", "upload"],
+    decision = "forbidden",
+    justification = "N-10: publishing packages through a runner is still done by CI.",
+    match = ["uvx twine upload dist/pkg.whl"],
+    not_match = ["uvx twine check dist/pkg.whl"],
+)
+
+prefix_rule(
+    pattern = [["python", "python3"], "-m", "twine", "upload"],
+    decision = "forbidden",
+    justification = "N-10: publishing packages through a runner is still done by CI.",
+    match = ["python3 -m twine upload dist/pkg.whl"],
+    not_match = ["python3 -m twine check dist/pkg.whl", "python3 -m pytest"],
 )
 
 prefix_rule(

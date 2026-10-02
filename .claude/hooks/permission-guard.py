@@ -58,6 +58,23 @@ VALUE_WRAPPERS = {  # wrapper -> options that consume the next token
     "flock": {"-w", "--timeout", "-E", "--conflict-exit-code"},
 }
 WRAPPERS_WITH_OPERAND = {"timeout": 1, "flock": 1}  # positional operands before the wrapped command
+RUNNERS = {  # runner -> (subcommands that run the next command, or () for the runner itself; options taking a value)
+    "uv": ({"run"}, {"--with", "--python", "-p", "--project", "--directory", "--package", "--extra", "--group", "--env-file", "--index"}),
+    "uvx": ((), {"--with", "--from", "--python", "-p", "--index"}),
+    "poetry": ({"run"}, {"--directory", "-C", "--project", "-P"}),
+    "pdm": ({"run"}, {"--project", "-p"}),
+    "hatch": ({"run"}, set()),
+    "pipx": ({"run"}, {"--spec", "--python", "--index-url", "-i"}),
+    "conda": ({"run"}, {"--name", "-n", "--prefix", "-p"}),
+    "npx": ((), {"--package", "-p"}),
+    "pnpx": ((), {"--package", "-p"}),
+    "bunx": ((), {"--package", "-p"}),
+    "npm": ({"exec", "x"}, {"--package", "-p", "--workspace", "-w"}),
+    "pnpm": ({"exec", "dlx"}, {"--package", "--dir", "-C", "--filter", "-F"}),
+    "yarn": ({"exec", "dlx"}, {"--package", "-p"}),
+    "bun": ({"x"}, {"--package", "-p"}),
+}
+PYTHON_PROGRAM = re.compile(r"^(python[0-9.]*|py)$")
 
 AGENT_BYPASS_FLAGS = frozenset({
     "--dangerously-skip-permissions", "--allow-dangerously-skip-permissions",
@@ -73,6 +90,8 @@ GIT_GLOBAL_VALUE_OPTIONS = frozenset({
 })
 GIT_PUSH_VALUE_OPTIONS = frozenset({"-o", "--push-option", "--repo", "--receive-pack", "--exec"})
 GIT_COMMIT_VALUE_SHORT = frozenset("mFcCt")
+GIT_CONFIG_READ_ACTIONS = frozenset({"--get", "--get-all", "--get-regexp", "get", "--list", "-l", "list"})
+GIT_CONFIG_UNSET_ACTIONS = frozenset({"--unset", "--unset-all", "unset"})
 
 ENV_EXAMPLE_SUFFIXES = frozenset({"example", "sample", "template"})
 SECRET_PATH_PATTERNS = tuple(re.compile(pattern) for pattern in (
@@ -279,8 +298,19 @@ def skip_options(words: List[str], value_options: Sequence[str]) -> List[str]:
     return words[index:]
 
 
+def strip_runner(name: str, words: Sequence[str]) -> Optional[List[str]]:
+    """Return the command a runner such as `uv run` or `npx` executes, or None."""
+    subcommands, value_options = RUNNERS[name]
+    rest = list(words[1:])
+    if subcommands:
+        if not rest or rest[0] not in subcommands:
+            return None
+        rest = rest[1:]
+    return skip_options(rest, tuple(value_options))
+
+
 def strip_wrappers(words: Sequence[str]) -> List[str]:
-    """Remove env assignments and exec wrappers (env, timeout, xargs, ...)."""
+    """Remove env assignments, exec wrappers (env, timeout, xargs, ...), and runners (uv run, npx, ...)."""
     remaining = list(words)
     while remaining:
         name = program_name(remaining[0])
@@ -291,9 +321,26 @@ def strip_wrappers(words: Sequence[str]) -> List[str]:
         elif name in VALUE_WRAPPERS:
             remaining = skip_options(remaining[1:], tuple(VALUE_WRAPPERS[name]))
             remaining = remaining[WRAPPERS_WITH_OPERAND.get(name, 0):]
+        elif name in RUNNERS:
+            executed = strip_runner(name, remaining)
+            if executed is None:
+                break
+            remaining = executed
         else:
             break
     return remaining
+
+
+def python_module(prog: str, args: List[str]) -> Tuple[str, List[str]]:
+    """Treat `python -m <module> <args>` as `<module> <args>`."""
+    if not PYTHON_PROGRAM.match(prog):
+        return prog, args
+    for index, arg in enumerate(args):
+        if arg == "-m" and index + 1 < len(args):
+            return program_name(args[index + 1]), args[index + 2:]
+        if not arg.startswith("-"):
+            break
+    return prog, args
 
 
 def strip_privilege(words: Sequence[str]) -> List[str]:
@@ -451,11 +498,24 @@ def check_git_local(subcommand: str, args: List[str]) -> Optional[Decision]:
     return None
 
 
+def changes_hooks_path(config_args: List[str]) -> bool:
+    """True when `git config <config_args>` sets or unsets core.hooksPath; reading it is fine."""
+    lowered = [arg.lower() for arg in config_args]
+    if "core.hookspath" not in lowered:
+        return False
+    index = lowered.index("core.hookspath")
+    before = set(lowered[:index])
+    if before & GIT_CONFIG_READ_ACTIONS:
+        return False
+    return bool(before & GIT_CONFIG_UNSET_ACTIONS) or index + 1 < len(lowered)
+
+
 def check_git(prog: str, args: List[str], tokens: List[str]) -> Optional[Decision]:
     if prog != "git":
         return None
     subcommand, sub_args, configs = git_subcommand(args)
-    if any(config.lower().startswith("core.hookspath") for config in configs):
+    hooks_overridden = any(config.lower().startswith("core.hookspath") for config in configs)
+    if hooks_overridden or (subcommand == "config" and changes_hooks_path(sub_args)):
         return finding(DENY, "N-04", "Overriding git hooks is never allowed.")
     skips_hooks = "--no-verify" in sub_args or (subcommand == "commit" and commit_skips_hooks(sub_args))
     if skips_hooks and subcommand in ("commit", "push", "merge", "rebase", "am", "cherry-pick"):
@@ -639,7 +699,7 @@ def evaluate_segment(segment: Segment, depth: int) -> Optional[Decision]:
     words = strip_wrappers(segment.words)
     if not words:
         return check_secret_access("", [], segment.redirect_targets)
-    prog, args = program_name(words[0]), words[1:]
+    prog, args = python_module(program_name(words[0]), words[1:])
     tokens = words + segment.redirect_targets
     results: List[Optional[Decision]] = [check_privilege(prog, args, tokens), check_agent_bypass(prog, args, tokens)]
     results.append(check_secret_access(prog, args, segment.redirect_targets))

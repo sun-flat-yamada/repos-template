@@ -39,7 +39,7 @@ denyMessage = "N-04: running an agent with approvals or sandbox disabled is neve
 
 [[rule]]
 toolName = "run_shell_command"
-commandRegex = 'git\s[^"&;|]*(--no-verify|core\.hooks[Pp]ath=)'
+commandRegex = 'git\s[^"&;|]*(--no-verify|core\.hooks[Pp]ath=|config\s[^"&;|]*core\.hooks[Pp]ath\s|config\s[^"&;|]*unset[^"&;|]*core\.hooks[Pp]ath)'
 decision = "deny"
 priority = 900
 denyMessage = "N-04: bypassing git hooks is never allowed."
@@ -148,6 +148,13 @@ commandPrefix = ["npm publish", "npm unpublish", "npm deprecate", "npm dist-tag"
 decision = "deny"
 priority = 900
 denyMessage = "N-10: publishing and registry credential management are done by CI, never by an agent."
+
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = '(uv\s+run|uvx|poetry\s+run|pdm\s+run|hatch\s+run|pipx\s+run|python[0-9.]*\s+-m)\s[^"&;|]*twine\s+upload'
+decision = "deny"
+priority = 900
+denyMessage = "N-10: publishing packages through a runner is still done by CI, never by an agent."
 
 [[rule]]
 toolName = "run_shell_command"
