@@ -5,7 +5,7 @@ category: "meta"
 type: "configuration"
 status: "active"
 date: 2026-09-20
-updated: 2026-10-01
+updated: 2026-10-03
 lang: "en"
 tags:
   - "gemini"
@@ -22,3 +22,4 @@ tags:
 - **Naming Conventions**: Agent definitions MUST use `*.agent.md` suffix and MUST NOT prefix with `agent-`. Strictly follow `.agents/rules/naming-rules-general.md`.
 - **Language Profile**: Load `.agents/agents/languages/coding-profile-{PRIMARY_LANGUAGE}.md` when operating on project code.
 - **Skills Loading**: Leverage modular `SKILL.md` packages located in `.agents/skills/`.
+- **Output Language**: Reply to the user and write PR titles/descriptions in Japanese; commit messages, code, identifiers, and comments stay in English. Details: `.agents/rules/git-rules-commit.md`.

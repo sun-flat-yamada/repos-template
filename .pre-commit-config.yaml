@@ -17,6 +17,9 @@ repos:
       - id: check-added-large-files
         args: ['--maxkb=5000']
       - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+        exclude: '\.(ps1|bat|cmd|psm1|psd1|vbs|reg|sln)$'
 
   # 🔒 Zero-Leak Secret Protection via Gitleaks
   - repo: https://github.com/gitleaks/gitleaks
