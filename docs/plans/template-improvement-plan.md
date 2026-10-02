@@ -5,7 +5,7 @@ category: "plan"
 type: "review"
 status: "active"
 date: 2026-10-01
-updated: 2026-10-01
+updated: 2026-10-02
 lang: "ja"
 tags:
   - "review"
@@ -398,6 +398,8 @@ tags:
 | P0-4 | すべてのワークフローに最小限の `permissions:` を追加 | D-1 | すべてのワークフローで権限が明示されている |
 | P0-5 | ガードの修正。`git config` による `core.hooksPath` の変更・削除を N-04 で、ランナー経由の publish を N-10 で拒否する（テストを先に書く）。ポリシー §5 に従い、各ツールの設定も同じ PR で更新する | C-1、C-2 | 追加したテストが失敗から成功に変わり、既存のテストもすべて成功する |
 | P0-6 | 文書の誤記修正（`make check`、Windsurf、`skills/languages`、ブランチ名、入れ子のフェンス）と `--markdown-linebreak-ext=md` の追加 | G-2（一部）、G-3、G-5、E-3 | リンク・パス検査で問題が 0 件 |
+
+**状態（2026-10-02）**: P0-1〜P0-6 を 1 つの PR で実装しました（作業ブランチが 1 本のため、項目ごとにコミットを分けています）。
 
 ### Phase 1: Copier への移行とテンプレート自身の品質ゲート（目安 1〜2 週間）
 

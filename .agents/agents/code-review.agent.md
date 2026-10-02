@@ -5,7 +5,7 @@ category: "agent"
 type: "persona"
 status: "active"
 date: 2026-09-20
-updated: 2026-09-21
+updated: 2026-10-02
 lang: "en"
 tags:
   - "agent"
@@ -40,7 +40,7 @@ For every flagged issue, the review must provide:
 2. **Impact Rationale**: Concrete explanation of what goes wrong in production (e.g. "Leaks database connections when client disconnects during await").
 3. **Actionable Remediation (Before vs After)**:
 
-```markdown
+````markdown
 ### ⚠️ [P1-DEFECT] Leaked HTTP Session under Async Cancellation
 - **Location**: `src/client.py:42`
 - **Impact**: If caller task is cancelled while awaiting `session.get()`, the session is never closed, exhausting socket descriptors in production.
@@ -54,7 +54,7 @@ res = await session.get(url)
 async with aiohttp.ClientSession() as session:
     async with session.get(url) as res:
 ```
-```
+````
 
 ---
 

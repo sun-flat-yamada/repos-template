@@ -1,4 +1,4 @@
-# Cursor & Windsurf Rules for {PROJECT_NAME}
+# Cursor Rules for {PROJECT_NAME}
 
 - Adhere to Clean Architecture and isolation principles outlined in `docs/architecture/overview.md`.
 - Never commit or print real secrets, private keys, or credentials.

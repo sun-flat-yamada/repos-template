@@ -94,7 +94,7 @@ python scripts/install-hooks.py
 | **Claude Code** | [`CLAUDE.md`](CLAUDE.md) | スラッシュコマンド（`/status`, `/test`, `/review`, `/plan`）およびガバナンス規則参照 |
 | **Google Antigravity** | [`.gemini/GEMINI.md`](.gemini/GEMINI.md) & `.agents/` | Two-Phase Governance、自律スキル実行、エージェント定義参照 |
 | **GitHub Copilot** | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) | アーキテクチャ標準およびコンテキスト階層（ガバナンス優先）の遵守 |
-| **Cursor / Windsurf** | [`.cursorrules`](.cursorrules) | エディタ統合インライン補完・設計ルール遵守 |
+| **Cursor** | [`.cursorrules`](.cursorrules) | エディタ統合インライン補完・設計ルール遵守 |
 | **OpenAI Codex CLI** | [`.codex/config.toml`](.codex/config.toml) | 権限3分類を強制するサンドボックス・承認ポリシー・実行ルール |
 
 ---
