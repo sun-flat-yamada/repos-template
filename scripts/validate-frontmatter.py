@@ -37,6 +37,15 @@ FRONTMATTER_OPTIONAL = frozenset({
 })
 
 
+# Verbatim upstream snapshots (see scripts/sync-upstream.py) must stay byte-identical
+# to the source repository, so they are exempt from front-matter validation.
+UPSTREAM_SNAPSHOT_ROOT = Path(".agents/upstream")
+
+
+def is_upstream_snapshot(rel_path: Path) -> bool:
+    return rel_path.as_posix().startswith(UPSTREAM_SNAPSHOT_ROOT.as_posix() + "/")
+
+
 def frontmatter_required(rel_path: Path) -> bool:
     return rel_path.as_posix() not in FRONTMATTER_OPTIONAL
 
@@ -99,7 +108,7 @@ def main() -> int:
     failures: List[Tuple[Path, List[str]]] = []
 
     for file_path in root.rglob("*.md"):
-        if ".git" in file_path.parts:
+        if ".git" in file_path.parts or is_upstream_snapshot(file_path):
             continue
         total_files += 1
         errs = validate_markdown_frontmatter(file_path)

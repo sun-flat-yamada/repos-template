@@ -1,0 +1,26 @@
+name: "Upstream Sync Check"
+
+on:
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: "Detect upstream drift"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Compare snapshots with upstream
+        run: |
+          python scripts/sync-upstream.py check | tee "$GITHUB_STEP_SUMMARY"
