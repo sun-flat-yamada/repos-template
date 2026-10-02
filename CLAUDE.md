@@ -5,7 +5,7 @@ category: "meta"
 type: "configuration"
 status: "active"
 date: 2026-09-20
-updated: 2026-09-21
+updated: 2026-10-03
 lang: "en"
 tags:
   - "claude-code"
@@ -36,4 +36,5 @@ tags:
 - **Zero Secrets**: Never output or commit API keys, tokens, or private credentials.
 - **Permission Tiers**: Follow `.agents/rules/permission-rules-general.md` (A: always allow, C: conditional, N: never). `.claude/settings.json` and `.claude/hooks/permission-guard.py` enforce it; never try to work around a denied or prompted action.
 - **TDD Requirement**: Propose unit tests before modifying or implementing application logic.
+- **Output Language**: Reply to the user and write PR titles/descriptions in Japanese; commit messages, code, identifiers, and comments stay in English. Details: `.agents/rules/git-rules-commit.md`.
 - **Language Alignment**: Consult language-specific profile in `.agents/agents/languages/coding-profile-{PRIMARY_LANGUAGE}.md`.

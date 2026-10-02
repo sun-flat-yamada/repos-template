@@ -6,7 +6,7 @@ category: rules
 type: specification
 status: active
 date: 2026-09-20
-updated: 2026-09-21
+updated: 2026-10-03
 lang: en
 tags:
 - rules
@@ -52,3 +52,10 @@ Commit messages must follow the structure:
 - `docs/<short-description>`: Documentation changes.
 - `refactor/<short-description>`: Code restructuring.
 - `chore/<short-description>`: Routine updates.
+
+## 3. Language of Commits and Pull Requests
+- Commit messages: English, following the Conventional Commits structure above.
+- Pull request titles: keep the Conventional Commits `<type>(<optional-scope>):` prefix in English; write the description after the colon in Japanese (e.g. `feat(auth): ログイン失敗時のリトライを追加`). The `pr-hygiene` workflow validates only the type prefix.
+- Pull request descriptions (including the filled-in `.github/PULL_REQUEST_TEMPLATE.md`): Japanese. Keep technical terms, identifiers, and error messages in their original English.
+
+See [`docs/guides/language-policy-guide.md`](../../docs/guides/language-policy-guide.md) for the full language policy, per-tool settings, and how to switch commit messages to Japanese.

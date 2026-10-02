@@ -5,7 +5,7 @@ category: "governance"
 type: "guidelines"
 status: "active"
 date: 2026-09-20
-updated: 2026-10-02
+updated: 2026-10-03
 lang: "en"
 tags:
   - "contributing"
@@ -59,6 +59,14 @@ We follow a feature branch workflow paired with **Conventional Commits**:
      - `docs: update getting started guide`
      - `refactor: streamline error handling logic`
      - `test: add unit coverage for authentication handler`
+
+---
+
+## 🔚 Line Endings
+
+- Text files are stored with **LF** line endings (see `.gitattributes`); only Windows-specific files (`.ps1`, `.bat`, `.cmd`, `.psm1`, `.psd1`, `.vbs`, `.reg`, `.sln`) use CRLF.
+- On Windows, set `git config core.autocrlf false` (or `input`) and configure your editor to save LF, so that working-tree files do not drift to CRLF.
+- The `mixed-line-ending --fix=lf` pre-commit hook normalizes staged files; run `pre-commit run --all-files` to fix existing ones.
 
 ---
 

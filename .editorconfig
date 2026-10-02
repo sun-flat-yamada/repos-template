@@ -33,5 +33,5 @@ indent_size = 4
 trim_trailing_whitespace = false
 
 # Windows Scripts
-[*.{bat,cmd,ps1}]
+[*.{bat,cmd,ps1,psm1,psd1,vbs,reg,sln}]
 end_of_line = crlf
