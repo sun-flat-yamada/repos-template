@@ -41,7 +41,7 @@ Concurrent agents must not share a working tree.
 | 5. Quality gate | See section 4 | All checks exit 0 |
 | 6. Walkthrough | `walkthrough.md` with diff summary and gate results | Gate green |
 | 7. PR | Rebase (unpushed) or merge base (pushed); push feature branch; open **draft** PR with `Closes #<id>` | C-HITL approval for push / PR |
-| 8. Merge | A human merges using **Rebase & Merge** | Never the agent (N-08) |
+| 8. Merge | **Rebase & Merge**; manual by default, automatic only with Auto-Pilot (section 6) | Agent-side merge is denied by N-08 unless the policy is changed |
 | 9. Cleanup | `python scripts/worktree-manage.py clean <branch>` from the primary root | After merge |
 
 Plan artifacts are shared via the PR, so they must contain no secrets, PII, or machine-specific absolute paths. Scratch files stay outside the repository.
@@ -57,3 +57,8 @@ Run inside the worktree; every command must exit 0:
 ## 5. Absolute Guardrails
 - No force-push, no `--no-verify`, no history rewrite of pushed commits.
 - Never bypass the quality gate or branch protection.
+
+## 6. Auto-Pilot (`CHG_DEV_AUTO_PILOT`)
+Opt-in mode that carries a change from PR creation to Rebase & Merge. Enabled only when `CHG_DEV_AUTO_PILOT` is `true` or `1`; resolution order is process environment → `.env` → `.env.example`. The repository default in `.env.example` is `false` (disabled).
+- Never relaxed: the plan **Proceed** gate, branch protection, required reviews. Never use `--admin`; never self-approve.
+- Enforcement: agent-side `gh pr merge` and `gh pr review --approve` are N-08 and denied by `.claude/settings.json` / `permission-guard.py`. Enabling the key does not lift that denial; changing it requires a human-reviewed policy change (ADR + every enforcement file, per `permission-rules-general.md` section 5).
