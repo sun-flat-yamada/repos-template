@@ -48,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The guard and every tool's permission configuration now block `git config` changes to `core.hooksPath` (N-04) and publishing through runners such as `uv run`, `uvx`, `npx`, and `python -m` (N-10).
 - Documentation no longer refers to a nonexistent `make check`, Windsurf support through `.cursorrules`, or `.agents/skills/languages/`; branch examples use `feat/`; a nested code fence in `code-review.agent.md` renders correctly; the `trailing-whitespace` hook keeps Markdown hard line breaks.
 
-## [1.0.0] - {CURRENT_YEAR}-09-20
+## [1.0.0] - {CURRENT_DATE}
 
 ### Added
 - Initial release of `{PROJECT_NAME}` template.
