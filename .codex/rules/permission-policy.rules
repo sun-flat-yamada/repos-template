@@ -336,6 +336,12 @@ prefix_rule(
 )
 
 prefix_rule(
+    pattern = ["git", "worktree", ["remove", "rm", "move", "mv"]],
+    decision = "prompt",
+    justification = "C-HITL-03: a forced worktree removal can discard work; use scripts/worktree-manage.py remove (ADR-0003).",
+)
+
+prefix_rule(
     pattern = ["git", ["clean", "restore"]],
     decision = "prompt",
     justification = "C-HITL-03: discarding work needs approval.",

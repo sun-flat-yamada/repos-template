@@ -227,7 +227,7 @@ toolName = "run_shell_command"
 commandPrefix = [
   "git push", "git clone", "git submodule add", "git remote add", "git remote set-url",
   "git reset --hard", "git clean", "git restore", "git checkout --", "git stash drop", "git stash clear",
-  "git branch -D", "git filter-branch", "git filter-repo", "git config --global", "gh",
+  "git branch -D", "git worktree remove", "git worktree rm", "git worktree move", "git worktree mv", "git filter-branch", "git filter-repo", "git config --global", "gh",
   "kill", "pkill", "killall", "env", "printenv", "eval",
 ]
 decision = "ask_user"
