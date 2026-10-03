@@ -70,7 +70,7 @@ One directory per change in the **primary repository root** (not in the worktree
    ```
    Re-run the gate after resolving conflicts. Push with approval (`git push -u origin <branch>`), then open a **draft** PR (title: `feat(scope): 日本語の説明`, body in Japanese, `Closes #42`) using the PR template.
 8. **Merge** — manual by default: a human performs **Rebase & Merge**. With Auto-Pilot enabled, the agent does it (see below).
-9. **Cleanup** — from the primary root: `python scripts/worktree-manage.py clean feat/42-new-feature`, then `git checkout main && git pull --ff-only origin main`.
+9. **Cleanup** — from the primary root: `python scripts/worktree-manage.py remove feat/42-new-feature`, then `git checkout main && git pull --ff-only origin main`.
 
 ## Auto-Pilot Mode (`CHG_DEV_AUTO_PILOT`)
 

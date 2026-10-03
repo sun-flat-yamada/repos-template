@@ -18,6 +18,8 @@ tags:
 
 Some files here are adapted from [`sun-flat-yamada/github-copilot-dashboard`](https://github.com/sun-flat-yamada/github-copilot-dashboard). That repository keeps changing, so this repository tracks what was adopted and when.
 
+> Not to be confused with [`fork-operations-guide.md`](fork-operations-guide.md): that guide covers a fork following **this template** (`main` mirror + `fork/custom`). This guide covers **this template** following its reference repository `github-copilot-dashboard`. The tracked files and procedures are separate.
+
 ## What Is Tracked
 
 Manifest: `.agents/upstream/github-copilot-dashboard.json`

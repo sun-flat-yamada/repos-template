@@ -42,7 +42,7 @@ Manages the end-to-end development lifecycle: Issue scoping, sibling worktree pr
    - Rebase unpushed branches onto the latest base; merge the base instead once the branch is pushed (never force-push).
    - Open a **draft** PR with `Closes #<id>`; title keeps the Conventional Commits prefix, description in Japanese.
 7. **Merge & Cleanup**
-   - Default (manual): a human merges with **Rebase & Merge**; the agent then removes the worktree and local branch (`python scripts/worktree-manage.py clean <branch>`).
+   - Default (manual): a human merges with **Rebase & Merge**; the agent then removes the worktree and local branch (`python scripts/worktree-manage.py remove <branch>`).
 8. **Auto-Pilot Mode (`CHG_DEV_AUTO_PILOT`)**:
    - When the key is `true` or `1` (resolution: process env → `.env` → `.env.example`; **disabled by default** in this repository), automatically proceed after PR creation: watch CI, self-heal failures, approve when permitted (never self-approve), Rebase & Merge, and clean up.
    - Never bypass branch protection (`--admin`) or the plan "Proceed" gate; stop and report when human approval is required but unavailable.
