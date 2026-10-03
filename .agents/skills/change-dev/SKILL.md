@@ -64,7 +64,9 @@ One directory per change in the **primary repository root** (not in the worktree
    ```bash
    git fetch origin main
    git rebase origin/main      # branch not pushed yet
-   git merge origin/main       # branch already pushed: never rewrite pushed history
+   git merge origin/main       # branch already pushed: default, keeps pushed history intact
+   # Alternative for a pushed branch: git rebase origin/main, then push with an explicit expected sha
+   #   git push --force-with-lease=<branch>:<sha> --force-if-includes origin <branch>   (per-action approval, C-HITL-01; the human verifies <sha> against the remote)
    ```
    Re-run the gate after resolving conflicts. Push with approval (`git push -u origin <branch>`), then open a **draft** PR (title: `feat(scope): 日本語の説明`, body in Japanese, `Closes #42`) using the PR template.
 8. **Merge** — manual by default: a human performs **Rebase & Merge**. With Auto-Pilot enabled, the agent does it (see below).
