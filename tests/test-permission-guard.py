@@ -352,6 +352,50 @@ class AskCommandTests(unittest.TestCase):
         self.assertEqual(decision_of("git push origin feat/x && sudo ls"), "deny")
 
 
+class WorktreeRemoveTests(unittest.TestCase):
+    """C-HITL-03: forced worktree removal discards work silently; only scripts/worktree-manage.py may do it (ADR-0003)."""
+
+    FORCED = [
+        "git worktree remove --force ../r-worktrees/feat-1",
+        "git worktree remove -f ../r-worktrees/feat-1",
+        "git worktree remove -f -f ../r-worktrees/feat-1",
+        "git worktree remove --force --force ../r-worktrees/feat-1",
+        "git worktree remove ../r-worktrees/feat-1 --force",
+        "git worktree remove ../r-worktrees/feat-1 -f",
+        "git worktree remove -ff ../r-worktrees/feat-1",
+        "git -C ../r worktree remove --force ../r-worktrees/feat-1",
+        "git --no-pager worktree remove -f x",
+        "bash -c 'git worktree remove --force x'",
+        "env GIT_DIR=.git git worktree remove -f x",
+        "git worktree remove --force x 2>&1",
+        "git worktree rm --force x",
+        "git worktree move -f a b",
+        "git worktree move a b --force",
+    ]
+    NOT_FORCED = [
+        "git worktree list",
+        "git worktree remove ../r-worktrees/feat-1",
+        "git worktree prune",
+        "git worktree add ../r-worktrees/feat-1 -b feat/1",
+        "python scripts/worktree-manage.py remove feat/14-x",
+        "python scripts/worktree-manage.py add feat/14-x",
+    ]
+
+    def test_forced_worktree_removal_requires_approval(self):
+        for command in self.FORCED:
+            with self.subTest(command=command):
+                self.assertEqual(decision_of(command), "ask")
+                self.assertEqual(rule_of(command), "C-HITL-03")
+
+    def test_unforced_and_scripted_forms_are_left_to_the_normal_flow(self):
+        for command in self.NOT_FORCED:
+            with self.subTest(command=command):
+                self.assertIsNone(decision_of(command))
+
+    def test_deny_wins_over_forced_worktree_removal(self):
+        self.assertEqual(decision_of("git worktree remove -f x && sudo ls"), "deny")
+
+
 class NoDecisionCommandTests(unittest.TestCase):
     """Tier A and C-SBX commands are left to the normal permission flow."""
 
@@ -524,6 +568,13 @@ class PolicyConfigurationTests(unittest.TestCase):
     def test_claude_allow_rules_never_grant_shell_access(self):
         allow = self.load_json(".claude/settings.json")["permissions"]["allow"]
         self.assertFalse([rule for rule in allow if rule == "Bash" or rule.startswith("Bash(")])
+
+    def test_forced_worktree_removal_is_gated_in_every_tool(self):
+        self.assertIn("Bash(git worktree remove --force*)", self.load_json(".claude/settings.json")["permissions"]["ask"])
+        self.assertIn("git worktree remove", (REPO_ROOT / ".gemini/policies/permission-policy.toml").read_text(encoding="utf-8"))
+        self.assertIn('"worktree"', (REPO_ROOT / ".codex/rules/permission-policy.rules").read_text(encoding="utf-8"))
+        vscode_rules = " ".join(self.load_json(".vscode/settings.json")["chat.tools.terminal.autoApprove"])
+        self.assertIn("worktree", vscode_rules)
 
     def test_other_tools_disable_unguarded_modes(self):
         self.assertTrue(self.load_json(".gemini/settings.json")["security"]["disableYoloMode"])

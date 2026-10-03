@@ -7,6 +7,7 @@
     "/^git\\b.*\\bpush\\b/": false,
     "/^git\\b.*\\b(clone|filter-branch|filter-repo)\\b/": false,
     "/^git\\b.*\\b(reset --hard|clean|restore|checkout --|stash (drop|clear)|branch -D)\\b/": false,
+    "/^git\\b.*\\bworktree (remove|rm|move|mv)\\b/": false,
     "/^git\\b.*\\b(remote (add|set-url)|submodule add|config --(global|system))\\b/": false,
     "/--no-verify\\b|core\\.hooks[Pp]ath/": false,
     "/(--dangerously-skip-permissions|--dangerously-bypass-approvals-and-sandbox|--yolo|--trust-all-tools|--allow-all-tools|danger-full-access|bypassPermissions)/": false,

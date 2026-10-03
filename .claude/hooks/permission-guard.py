@@ -513,7 +513,22 @@ def commit_skips_hooks(args: List[str]) -> bool:
     return False
 
 
+WORKTREE_FORCE_SUBCOMMANDS = frozenset({"remove", "rm", "move", "mv"})
+
+
+def is_forced_worktree_change(args: List[str]) -> bool:
+    """`git worktree remove|move` with --force/-f (also doubled, for locked worktrees) discards work silently."""
+    words = positional(args)
+    return bool(words) and words[0] in WORKTREE_FORCE_SUBCOMMANDS and ("--force" in args or has_short_flag(args, "f"))
+
+
 def check_git_local(subcommand: str, args: List[str]) -> Optional[Decision]:
+    if subcommand == "worktree" and is_forced_worktree_change(args):
+        return finding(
+            ASK, "C-HITL-03",
+            "Forced `git worktree remove` can silently discard uncommitted or unpushed work; "
+            "use `python scripts/worktree-manage.py remove <branch>` (ADR-0003).",
+        )
     destructive = (
         (subcommand == "reset" and "--hard" in args)
         or (subcommand == "clean" and ("--force" in args or has_short_flag(args, "f")))

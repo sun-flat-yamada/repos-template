@@ -109,7 +109,7 @@ tags:
 | **C-SBX** サンドボックス内のみ | ビルド・テスト・Lint、ロックファイル準拠のインストール、`git add`/`commit` | 人間の承認（C-HITL） |
 | **C-NET** 許可リストの宛先のみ | パッケージレジストリ、公式ドキュメント | 人間の承認。流出先・メタデータは禁止（N-09） |
 | **C-SCOPE** スコープ限定 | ワークスペース外の読み取りは人間が追加したディレクトリのみ。pushは保護されていないブランチのみ。クラウド操作は開発・ステージングのみ | 禁止（N-07 / N-08）または承認 |
-| **C-HITL** 都度の人間承認 | push（強制pushは `git push --force-with-lease=<branch>:<sha> --force-if-includes <remote> <branch>` の形のみ。ADR-0002）・PR・Issue、依存関係の変更、再帰削除・`reset --hard`、シェルからのネットワーク、AI/CI/ガバナンス設定の編集、コンテナ・クラウド・DBクライアント、サンドボックス外実行、MCP、環境変数の全出力 | 実行しない |
+| **C-HITL** 都度の人間承認 | push（強制pushは `git push --force-with-lease=<branch>:<sha> --force-if-includes <remote> <branch>` の形のみ。ADR-0002）・PR・Issue、依存関係の変更、再帰削除・`reset --hard`・`git worktree remove --force`（ADR-0003: 自動削除は `scripts/worktree-manage.py remove` のみ）、シェルからのネットワーク、AI/CI/ガバナンス設定の編集、コンテナ・クラウド・DBクライアント、サンドボックス外実行、MCP、環境変数の全出力 | 実行しない |
 
 ### N — いかなる場合も禁止
 
@@ -223,6 +223,7 @@ codex execpolicy check --rules .codex/rules/permission-policy.rules git push ori
 - **テスト実行は任意コード実行と等価**: エージェントが編集したテストやビルドスクリプトを実行するため、サンドボックスがない環境（ネイティブWindows、bubblewrap未導入のLinux）では毎回承認になります。
 - **許可ドメイン経由の流出**: レジストリやGitHubなど広いドメインへの通信は、アップロードやドメインフロンティングに悪用される余地があります。許可リストは最小限に保ってください。
 - **`--force-with-lease` の限界**: lease はリモート追跡 ref が「最後に見た状態」かだけを確認するため、バックグラウンドの `fetch` で追跡 ref が進むと未確認コミットがあっても通ります。そのため sha の明示と `--force-if-includes` を必須にし、承認者が sha を確認します（ADR-0002）。
+- **worktree の強制削除**: 生の `git worktree remove|move --force`/`-f`（`-f -f`、`-ff`、`git -C`、`bash -c`、`env` 経由を含む）は C-HITL-03 です。マージ済み・push 済みの sibling worktree の後始末は `python scripts/worktree-manage.py remove <branch>` だけが自動で行えます。スクリプトは、sibling ディレクトリ配下・主/カレント worktree でない・ロックなし・tracked の変更なし・未追跡は `.gitignore` 対象のみ・HEAD が `origin/<branch>` または `origin/main` に含まれる、をすべて満たす場合のみ `--force` を使い、満たさなければ理由を表示して終了コード 2 で止まります。判定はスクリプト内で完結しガードは git 状態を見ません。`fetch` はしないため、push 済みの判定は手元のリモート追跡 ref に基づきます（ADR-0003）。Codex / Gemini / VS Code は `force` の位置を問わず `git worktree remove|move` 全般を確認対象にし、Cursor は許可リストにないため確認になります（ポリシーより厳しい側）。
 - **ツールごとの表現力の差**: Codex はフラグ位置を問わない一致ができず、Cursor CLI には ask がなく、VS Code の `false` は承認止まり、Gemini のワークスペースポリシーは無効です（各節の「限界」を参照）。
 
 ---

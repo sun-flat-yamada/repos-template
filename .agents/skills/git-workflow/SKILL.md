@@ -42,6 +42,11 @@ git add src/auth/oauth.py tests/test_oauth.py
 git commit -m "feat(auth): implement OAuth2 token refresh handler"
 ```
 
+## Worktree Cleanup
+- After the PR is merged, remove a sibling worktree with `python scripts/worktree-manage.py remove <branch>` (run it from the main checkout, not from inside the worktree).
+- It forces removal only when nothing can be lost (pushed or merged, no tracked changes, only git-ignored untracked files, not locked). If it exits with status 2, report the listed reasons to a human.
+- Never run `git worktree remove --force` or `rm -rf` on a worktree yourself (C-HITL-03).
+
 ## Best Practices
 - Never use `--no-verify` to bypass Git hooks.
 - Keep commits atomic: one conceptual change per commit.
