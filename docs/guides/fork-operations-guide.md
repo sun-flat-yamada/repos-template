@@ -19,7 +19,7 @@ tags:
 
 本ガイドは、本テンプレートを fork した先で upstream の更新を取り込みながら運用する方法を説明します。決定の経緯は [ADR-0003](../adr/0003-adopt-dual-branch-fork-operation.md)、エージェント向け手順は [`fork-sync-ops`](../../.agents/skills/fork-sync-ops/SKILL.md) を参照してください。
 
-> **注**: PR #12 で導入予定の upstream 同期の仕組み（`docs/guides/upstream-sync-guide.md` など）は、本ガイド作成時点で main に未反映です。マージ後に役割分担を見直し、手順が二重管理にならないよう統合します。
+> **注**: [`upstream-sync-guide.md`](upstream-sync-guide.md) は、本テンプレートが参照元（`github-copilot-dashboard`）の `change-dev` 系ファイルを追う仕組み（テンプレート保守者向け、`scripts/sync-upstream.py`）です。本ガイドは、fork 先が**本テンプレート**を追う運用（`main` のミラーと `fork/custom`、`scripts/verify-fork-health.py`）で、追跡対象も手順も別です。二重管理にはなりません。
 
 ---
 

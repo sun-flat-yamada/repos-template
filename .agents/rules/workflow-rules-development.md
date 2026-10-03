@@ -42,7 +42,7 @@ Concurrent agents must not share a working tree.
 | 6. Walkthrough | `walkthrough.md` with diff summary and gate results | Gate green |
 | 7. PR | Rebase (unpushed) or merge base (pushed; default). Optionally rebase a pushed branch and push with `--force-with-lease=<branch>:<sha> --force-if-includes` (approval required); push feature branch; open **draft** PR with `Closes #<id>` | C-HITL approval for push / PR |
 | 8. Merge | **Rebase & Merge**; manual by default, automatic only with Auto-Pilot (section 6) | Agent-side merge is denied by N-08 unless the policy is changed |
-| 9. Cleanup | `python scripts/worktree-manage.py clean <branch>` from the primary root | After merge |
+| 9. Cleanup | `python scripts/worktree-manage.py remove <branch>` from the primary root | After merge |
 
 Plan artifacts are shared via the PR, so they must contain no secrets, PII, or machine-specific absolute paths. Scratch files stay outside the repository.
 
