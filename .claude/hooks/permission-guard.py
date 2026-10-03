@@ -527,7 +527,7 @@ def check_git_local(subcommand: str, args: List[str]) -> Optional[Decision]:
         return finding(
             ASK, "C-HITL-03",
             "Forced `git worktree remove` can silently discard uncommitted or unpushed work; "
-            "use `python scripts/worktree-manage.py remove <branch>` (ADR-0003).",
+            "use `python scripts/worktree-manage.py remove <branch>` (ADR-0004).",
         )
     destructive = (
         (subcommand == "reset" and "--hard" in args)

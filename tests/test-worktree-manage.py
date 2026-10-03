@@ -2,7 +2,7 @@
 """
 tests/test-worktree-manage.py
 ==============================================================================
-Unit tests for scripts/worktree-manage.py `remove` (ADR-0003): a forced removal
+Unit tests for scripts/worktree-manage.py `remove` (ADR-0004): a forced removal
 is allowed only when nothing can be lost. Uses real temporary git repositories.
 
     python tests/test-worktree-manage.py -v
