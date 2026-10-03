@@ -2,7 +2,7 @@ name: "Template Placeholder Check"
 
 on:
   pull_request:
-    branches: ["main"]
+    branches: ["main", "fork/custom"]
 
 permissions:
   contents: read
