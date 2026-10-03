@@ -34,9 +34,10 @@ Manifest: `.agents/upstream/github-copilot-dashboard.json`
 Not adopted on purpose:
 - `fork-sync-ops`, `benchmark-ingestion`, `preset-curator`, `radar-version-manager`, `sns-buzz-harvester` and the other dashboard agents: project-specific.
 - `skills/*` (distribution copies of the same skills) and `secret-guard` (covered by `security-secret-audit`).
-- `--force-with-lease`, `worktree remove --force`, and manual directory deletion: they conflict with N-05 / C-HITL-03 in `permission-rules-general.md`.
+- `worktree remove --force` and manual directory deletion: they conflict with C-HITL-03 in `permission-rules-general.md`.
 
 Local divergences from upstream:
+- Upstream pushes with a plain `--force-with-lease`. Here only `git push --force-with-lease=<branch>:<sha> --force-if-includes origin <branch>` is allowed, as a C-HITL-01 approval on a non-protected feature branch (ADR-0002); a bare lease, a lease without `<sha>` or `--force-if-includes`, `--force`, and `-f` stay denied (N-05).
 - Auto-Pilot is adopted as-is, but `CHG_DEV_AUTO_PILOT` is **disabled by default** (`.env.example` sets `false`; upstream sets `true`). Its approve / merge steps stay denied by the permission guard (N-08).
 
 ## Periodic Update Procedure
