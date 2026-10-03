@@ -27,7 +27,7 @@ last_reviewed: "{CURRENT_DATE}"
 [![Security: Gitleaks](https://img.shields.io/badge/Security-Gitleaks%20Protected-orange.svg)](SECURITY.md)
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/{BUY_ME_A_COFFEE_USERNAME})
 
-[日本語版 (README.ja.md)](README.ja.md) | [🏛️ Architecture Overview](docs/architecture/overview.md) | [📖 Getting Started](docs/guides/getting-started.md) | [🔒 Security Policy](SECURITY.md) | [📋 ADR Records](docs/adr/)
+[日本語版 (README.ja.md)](README.ja.md) | [🏛️ Architecture Overview](docs/architecture/overview.md) | [📖 Getting Started](docs/guides/getting-started.md) | [🔒 Security Policy](SECURITY.md) | [🍴 Fork Operations](docs/guides/fork-operations-guide.md) | [📋 ADR Records](docs/adr/)
 
 ---
 
@@ -127,12 +127,14 @@ All resources follow strict naming conventions (agent definitions use `*.agent.m
 | | [`.agents/agents/qa-gatekeeper.agent.md`](.agents/agents/qa-gatekeeper.agent.md) | Quality gate & regression verification |
 | | [`.agents/agents/security-sentinel.agent.md`](.agents/agents/security-sentinel.agent.md) | Secret & Prompt injection defense |
 | | [`.agents/agents/docs-maintainer.agent.md`](.agents/agents/docs-maintainer.agent.md) | Documentation & API sync agent |
+| | [`.agents/agents/fork-sync.agent.md`](.agents/agents/fork-sync.agent.md) | Upstream sync for forks (dual-branch) |
 | **Agents (Language Profiles)** | [`.agents/agents/languages/`](.agents/agents/languages/) | `coding-profile-<lang>.md` & `code-review-profile-<lang>.md` for 9 languages |
 | **Skills (General)** | [`.agents/skills/git-workflow/`](.agents/skills/git-workflow/SKILL.md) | Conventional Commits & PR hygiene |
 | | [`.agents/skills/tdd-cycle/`](.agents/skills/tdd-cycle/SKILL.md) | Red-Green-Refactor test cycle automation |
 | | [`.agents/skills/code-review-gatekeeper/`](.agents/skills/code-review-gatekeeper/SKILL.md) | Automated review rubric checks |
 | | [`.agents/skills/security-secret-audit/`](.agents/skills/security-secret-audit/SKILL.md) | Secret scanning & CVE audit |
 | | [`.agents/skills/adr-management/`](.agents/skills/adr-management/SKILL.md) | Architecture Decision Record creation |
+| | [`.agents/skills/fork-sync-ops/`](.agents/skills/fork-sync-ops/SKILL.md) | Fork sync procedure and human-only steps |
 | **Skills (Toolchains)** | [`.agents/skills/toolchain-python/`](.agents/skills/) | `toolchain-<lang>` for 9 supported languages |
 | **Skills (Language Reviews)** | [`.agents/skills/code-review-python/`](.agents/skills/) | `code-review-<lang>` for 9 supported languages |
 | **Rules** | [`.agents/rules/coding-rules-general.md`](.agents/rules/coding-rules-general.md) | Clean code principles (DRY, KISS, SOLID) |

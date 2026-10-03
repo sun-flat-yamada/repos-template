@@ -29,6 +29,7 @@ tags:
 - `/test`: Run automated test suites corresponding to `{PRIMARY_LANGUAGE}`.
 - `/check-names`: Run `python scripts/validate-filenames.py` to verify file naming rules.
 - `/review`: Evaluate current branch against `.agents/agents/code-review.agent.md`.
+- `/verify-fork`: In a fork, run `python scripts/verify-fork-health.py` and follow `.agents/skills/fork-sync-ops/SKILL.md` / `docs/guides/fork-operations-guide.md` (never push `main`).
 - `/plan`: Create an implementation plan before writing or refactoring significant code.
 
 ## Directives

@@ -2,9 +2,9 @@ name: "CI Pipeline"
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "fork/custom"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "fork/custom"]
 
 permissions:
   contents: read
@@ -28,11 +28,15 @@ jobs:
 
       - name: Syntax & Compilation Check
         run: |
-          python -m py_compile scripts/apply-template.py scripts/install-hooks.py scripts/validate-filenames.py scripts/validate-frontmatter.py .claude/hooks/permission-guard.py
+          python -m py_compile scripts/apply-template.py scripts/install-hooks.py scripts/validate-filenames.py scripts/validate-frontmatter.py scripts/verify-fork-health.py .claude/hooks/permission-guard.py
 
       - name: AI Permission Policy Tests
         run: |
           python tests/test-permission-guard.py -v
+
+      - name: Fork Health Script Tests
+        run: |
+          python tests/test-verify-fork-health.py -v
 
       - name: Front Matter Validation
         run: |

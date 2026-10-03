@@ -27,7 +27,7 @@ last_reviewed: "{CURRENT_DATE}"
 [![Security: Gitleaks](https://img.shields.io/badge/Security-Gitleaks%20Protected-orange.svg)](SECURITY.md)
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/{BUY_ME_A_COFFEE_USERNAME})
 
-[English Version (README.md)](README.md) | [🏛️ アーキテクチャ概要](docs/architecture/overview.md) | [📖 実践利用ガイド](docs/guides/getting-started.md) | [🔒 セキュリティポリシー](SECURITY.md) | [📋 ADR 記録集](docs/adr/)
+[English Version (README.md)](README.md) | [🏛️ アーキテクチャ概要](docs/architecture/overview.md) | [📖 実践利用ガイド](docs/guides/getting-started.md) | [🔒 セキュリティポリシー](SECURITY.md) | [🍴 fork 運用ガイド](docs/guides/fork-operations-guide.md) | [📋 ADR 記録集](docs/adr/)
 
 ---
 
