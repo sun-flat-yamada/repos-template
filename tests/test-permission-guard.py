@@ -353,7 +353,7 @@ class AskCommandTests(unittest.TestCase):
 
 
 class WorktreeRemoveTests(unittest.TestCase):
-    """C-HITL-03: forced worktree removal discards work silently; only scripts/worktree-manage.py may do it (ADR-0003)."""
+    """C-HITL-03: forced worktree removal discards work silently; only scripts/worktree-manage.py may do it (ADR-0004)."""
 
     FORCED = [
         "git worktree remove --force ../r-worktrees/feat-1",

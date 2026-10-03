@@ -12,7 +12,7 @@ never inside it, so scanners, test runners, and `git status` stay clean.
     python scripts/worktree-manage.py clean <branch>               # plain `git worktree remove`
     python scripts/worktree-manage.py remove <branch>              # checked, forced removal
 
-`remove` is the ONLY sanctioned way to force-remove a worktree (ADR-0003). It refuses
+`remove` is the ONLY sanctioned way to force-remove a worktree (ADR-0004). It refuses
 unless nothing can be lost: sibling directory, not the main or current worktree,
 not locked, no tracked changes, no untracked files except git-ignored ones, and
 HEAD already contained in `origin/<branch>` or `origin/<base>`. Anything else is
@@ -168,7 +168,7 @@ def remove_worktree(repo: Path, branch: str) -> None:
     if reasons:
         raise RemovalBlocked(reasons)
     target = worktrees_dir(repo) / to_slug(branch)
-    run_git(repo, "worktree", "remove", "--force", str(target))  # safe: checked above (ADR-0003)
+    run_git(repo, "worktree", "remove", "--force", str(target))  # safe: checked above (ADR-0004)
     run_git(repo, "worktree", "prune")
     delete_merged_branch(repo, branch)
 

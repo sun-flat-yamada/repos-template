@@ -1,5 +1,5 @@
 ---
-title: "ADR-0003: Gate Forced Worktree Removal Behind a Checked Script"
+title: "ADR-0004: Gate Forced Worktree Removal Behind a Checked Script"
 description: "Decision to keep raw git worktree remove --force at C-HITL-03 and allow forced removal only through scripts/worktree-manage.py remove, which refuses unless no work can be lost."
 category: "adr"
 type: "decision-record"
@@ -15,7 +15,7 @@ tags:
   - "git-worktree"
 ---
 
-# 3. Gate Forced Worktree Removal Behind a Checked Script
+# 4. Gate Forced Worktree Removal Behind a Checked Script
 
 Date: 2026-10-03
 
