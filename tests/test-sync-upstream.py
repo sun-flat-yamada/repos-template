@@ -151,5 +151,65 @@ class SyncUpstreamTests(unittest.TestCase):
             sync.run_check(self.manifest)
 
 
+class MultiManifestTests(unittest.TestCase):
+    """Every manifest in a directory is checked, and one failure does not stop the rest."""
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        tmp = Path(self._tmp.name)
+        self.manifest_dir = tmp / "project" / "upstream"
+        self.manifest_dir.mkdir(parents=True)
+        self.upstreams = {}
+        for name in ("first", "second"):
+            repo = tmp / name
+            repo.mkdir()
+            git(repo, "init", "-q", "-b", "main")
+            (repo / "a.md").write_text(f"{name}\n", encoding="utf-8")
+            git(repo, "add", "-A")
+            git(repo, "commit", "-q", "-m", "init")
+            self.upstreams[name] = repo
+            self.write_manifest(name, str(repo))
+
+    def write_manifest(self, name: str, repo: str) -> Path:
+        path = self.manifest_dir / f"{name}.json"
+        data = {"repo": repo, "synced_commit": None, "files": [{"source": "a.md", "adapted": f"out/{name}.md"}]}
+        path.write_text(json.dumps(data), encoding="utf-8")
+        return path
+
+    def test_discover_manifests_returns_sorted_json_files_only(self) -> None:
+        (self.manifest_dir / "notes.txt").write_text("x", encoding="utf-8")
+        (self.manifest_dir / "first").mkdir()
+        found = sync.discover_manifests(self.manifest_dir)
+        self.assertEqual([p.name for p in found], ["first.json", "second.json"])
+
+    def test_discover_manifests_fails_when_none_found(self) -> None:
+        with self.assertRaises(ValueError):
+            sync.discover_manifests(self.manifest_dir / "empty")
+
+    def test_run_all_update_then_check_covers_every_manifest(self) -> None:
+        manifests = sync.discover_manifests(self.manifest_dir)
+        sync.run_all(manifests, write=True)
+        results = sync.run_all(manifests, write=False)
+        self.assertEqual([r.manifest.name for r in results], ["first.json", "second.json"])
+        self.assertTrue(all(r.error is None and not r.report.has_changes for r in results))
+
+    def test_run_all_isolates_a_failing_manifest(self) -> None:
+        self.write_manifest("broken", str(self.manifest_dir / "does-not-exist"))
+        results = sync.run_all(sync.discover_manifests(self.manifest_dir), write=False)
+        by_name = {r.manifest.name: r for r in results}
+        self.assertIsNotNone(by_name["broken.json"].error)
+        self.assertIsNone(by_name["first.json"].error)
+        self.assertTrue(by_name["second.json"].report.has_changes)
+
+    def test_exit_code_reports_error_over_changes(self) -> None:
+        manifests = sync.discover_manifests(self.manifest_dir)
+        self.assertEqual(sync.exit_code(sync.run_all(manifests, write=False)), 1)
+        sync.run_all(manifests, write=True)
+        self.assertEqual(sync.exit_code(sync.run_all(manifests, write=False)), 0)
+        self.write_manifest("broken", str(self.manifest_dir / "does-not-exist"))
+        self.assertEqual(sync.exit_code(sync.run_all(sync.discover_manifests(self.manifest_dir), write=False)), 2)
+
+
 if __name__ == "__main__":
     unittest.main()
