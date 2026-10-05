@@ -1,0 +1,10 @@
+{
+  "repo": "https://github.com/sun-flat-yamada/claude-audit-dashboard",
+  "synced_commit": "9efbe4433374df3a855b50f4e83a3cf88ba7f18e",
+  "files": [
+    {
+      "source": ".agents/rules/naming-rules-general.md",
+      "adapted": ".agents/rules/naming-rules-general.md"
+    }
+  ]
+}
