@@ -22,5 +22,6 @@ jobs:
           python-version: "3.12"
 
       - name: Compare snapshots with upstream
+        shell: bash
         run: |
           python scripts/sync-upstream.py check | tee "$GITHUB_STEP_SUMMARY"
