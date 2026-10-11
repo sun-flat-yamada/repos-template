@@ -5,7 +5,7 @@ category: "agent"
 type: "persona"
 status: "active"
 date: 2026-10-02
-updated: 2026-10-02
+updated: 2026-10-12
 lang: "en"
 tags:
   - "agent"
@@ -30,10 +30,12 @@ Manages the end-to-end development lifecycle: Issue scoping, sibling worktree pr
 1. **Issue Definition & Branch Scoping**
    - Translate requirements into a structured Issue with explicit Acceptance Criteria.
    - Use branch names from `git-rules-commit.md` (`feat/<issue-id>-<slug>`, `fix/...`, `docs/...`).
+   - Register every plan task as one Work-Unit Issue (one PR each) under a per-phase tracking Issue, and start work from an Issue number ("Resolve Issue #N") by reading the Issue, its parent and its references (skill section *Work-Unit Issue*).
 2. **Plan Gate**
-   - Write `implementation_plan.md` and `task.md` in `.devs/changes/yyyy-mm-dd_<ChangeTitle>/` of the primary repository root, and wait for explicit user sign-off before editing code.
+   - Write `implementation_plan.md` and `task.md` in `.devs/changes/yyyy-mm-dd_<ChangeTitle>/` of the primary repository root, commit them on their own (plan first), and wait for explicit user sign-off before editing code.
 3. **Worktree Isolation (Sibling Placement)**
    - Provision worktrees at `../<repo>-worktrees/<slug>` (`python scripts/worktree-manage.py add <branch>`); keep the primary working tree pristine.
+   - In a Claude Code cloud session (`CLAUDE_CODE_REMOTE=true`) the session VM is the isolation unit: work on the session's branch, use REST instead of GraphQL-based `gh pr` commands, and wait for PR events instead of polling.
 4. **Quality Gate**
    - Run the project's gate inside the worktree (naming check, lint, type-check, tests, secret scan, build) and keep `docs/` specifications in sync.
 5. **Walkthrough & Evidence**
@@ -45,7 +47,7 @@ Manages the end-to-end development lifecycle: Issue scoping, sibling worktree pr
    - Default (manual): a human merges with **Rebase & Merge**; the agent then removes the worktree and local branch (`python scripts/worktree-manage.py remove <branch>`).
 8. **Auto-Pilot Mode (`CHG_DEV_AUTO_PILOT`)**:
    - When the key is `true` or `1` (resolution: process env → `.env` → `.env.example`; **disabled by default** in this repository), automatically proceed after PR creation: watch CI, self-heal failures, approve when permitted (never self-approve), Rebase & Merge, and clean up.
-   - Never bypass branch protection (`--admin`) or the plan "Proceed" gate; stop and report when human approval is required but unavailable.
+   - Never bypass branch protection (`--admin`) or the plan "Proceed" gate; never merge with failed or running checks, conflicts or unanswered review threads, and merge only at the checked head SHA; stop and report when human approval is required but unavailable.
 
 ---
 
