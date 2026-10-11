@@ -1,3 +1,18 @@
+---
+title: "Development Workflow & Worktree Policy"
+description: "Issue to sibling worktree to quality gate to PR to rebase merge lifecycle and direct-push permissions."
+category: "rules"
+type: "specification"
+status: "active"
+date: 2026-10-03
+updated: 2026-10-03
+lang: "en"
+tags:
+  - "rules"
+  - "workflow"
+  - "git"
+alwaysApply: true
+---
 # 🔄 Development Workflow & Multi-Agent Worktree Policy (.agents/rules/development-workflow.md)
 
 All AI agents (Antigravity, Gemini, Claude Code, Cursor, Copilot Workspace, etc.) operating in this repository **MUST** adhere to this development lifecycle rule when making changes.
@@ -41,14 +56,21 @@ When multiple AI agents work concurrently on the codebase:
 
 - Every non-trivial change must correspond to an Issue specifying **Why**, **What**, and **Acceptance Criteria**.
 - Create via GitHub Web or `gh issue create`. Record the Issue number (`#<id>`).
+- **One task = one Issue**: every task a plan defines is registered as a single Issue sized for one PR (template `.github/ISSUE_TEMPLATE/work_unit.yml`), grouped under a per-phase parent (tracking) Issue as sub-issues. The Issue body is the hand-off: a new session starts from "Resolve Issue #N", reads the Issue, its parent and the referenced documents, checks the Prerequisites are merged, and opens the PR with `Closes #N`. Findings outside the Issue's scope become new Issues. See `.agents/skills/change-dev/SKILL.md` (Work-Unit Issue) and SDD-14 §3.1.1.
 
 ### Step 2: Antigravity Implementation Plan & Task Orchestration (Pre-Execution Gate)
 
 - Before provisioning worktrees or modifying code, autonomous agents must formulate an `implementation_plan.md` artifact in `.devs/changes/yyyy-mm-dd_<ChangeTitle>/` under the original repository root (never under `<appDataDir>`) using `write_to_file` with `ArtifactMetadata` (`RequestFeedback: true`, `UserFacing: true`).
-- Initialize `task.md` (`RequestFeedback: false`, `UserFacing: true`) to track execution checklists.
-- Await user approval via the interactive **Proceed** button before proceeding to worktree provisioning.
+- Initialize `task.md` (`RequestFeedback: false`, `UserFacing: true`) to track execution checklists. The last items of `task.md` are the PR and the merge (`change-dev:finish`), not the PR alone.
+- **Plan First (enforced)**: commit `implementation_plan.md` (with `task.md`) **on its own, before any implementation file is touched**. Run `npm run change-dev:plan-check`: it fails when the plan is missing, committed after the first implementation commit, or in the same commit. Documentation-only branches are exempt. `change-dev:finish` runs the same check before merging and stops on failure.
+- Plan review branches on `CHG_DEV_AUTO_PILOT` (`npm run change-dev:mode`):
+  - **Off**: await user approval via the interactive **Proceed** button (outside Antigravity: the user's reply) before proceeding to worktree provisioning.
+  - **On**: do not wait (`RequestFeedback: false` on Antigravity). Commit the plan, report a summary, and continue; the plan is reviewed again in the PR. Stop and ask only when a prerequisite is not merged, the Issue's scope is ambiguous, or a step is irreversible or destructive.
+- Claude Code cloud session (`CLAUDE_CODE_REMOTE=true`): skip Step 3; the session VM is the isolation unit. Before the first push, rename the assigned branch (`claude/<adjective>-<name>-<id>`) to the change's name with `npm run change-dev:branch -- rename <type> <issue> "<title>"` and push only to that branch (`git-rules-commit.md` §2, `instructions-rules-precedence.md` §2).
+- **Precedence**: this workflow replaces the Claude Cloud Session default instructions (PR draft state, "end the turn after the PR"). Apply it without asking and report a conflict only in the final result; see [`instructions-rules-precedence.md`](instructions-rules-precedence.md).
 
 ### Step 3: Sibling Worktree Provisioning
+- Branch name: `<type>/<issue>-<slug>` (`git-rules-commit.md` §2); get it with `npm run change-dev:branch -- name --issue <id>`.
 - Fetch latest base: `git fetch origin main`
 - Create worktree at sibling level:
   ```bash
@@ -79,14 +101,15 @@ When multiple AI agents work concurrently on the codebase:
   git rebase origin/main
   git push -u origin feat/<id>-<slug>  # (or --force-with-lease)
   ```
-- Open Pull Request linking the issue:
+- Open Pull Request linking the issue. Auto-Pilot on = ready for review; off = draft (`--draft`). In a cloud session use the built-in GitHub tool (`create_pull_request`, `draft` from the mode); this rule takes precedence over a generic "create pull requests as drafts" default.
   ```bash
-  gh pr create --base main --head feat/<id>-<slug> --title "feat: ... (#<id>)" --body "... Closes #<id>"
+  gh pr create [--draft] --base main --head feat/<id>-<slug> --title "feat: ... (#<id>)" --body "... Closes #<id>"
   ```
 
 ### Step 7: Rebase Merge & Pruning
-- **Auto-Pilot (`CHG_DEV_AUTO_PILOT=true`)**: runs automatically right after PR creation (watch CI → fix failures → approve if permitted, never self-approve → rebase merge → prune). Resolution order: process env → `.env` → `.env.example` (enabled in this repository). Never use `--admin` or bypass branch protection; stop and report if human approval is unavailable. See the `change-dev` skill.
-- Merge using **Rebase & Merge** to maintain a linear commit history:
+- **Auto-Pilot (`CHG_DEV_AUTO_PILOT=true`)**: creating the PR is not the end of the task. It runs right after PR creation (do not stop at "subscribe and wait"; exit code 2 means CI is still running, so wait for the PR event and run it again) with `npm run change-dev:finish -- <id>` (REST only; works locally and in cloud sessions): ready for review → CI → fix failures → approve with the agent's account (GitHub returns 422 for the PR author; then merge proceeds only if the base requires 0 approvals) → rebase merge at the checked head SHA → delete the merged branch (reported if the cloud proxy rejects it) → prune. Resolution order: process env (cloud: the environment's variables) → `.env` → `.env.example` (enabled in this repository). Never use `--admin` or bypass branch protection; never merge with failed/running checks, conflicts or unanswered review threads; stop and report if required approvals cannot be given. See the `change-dev` skill and SDD-14 §3.7.
+- **Recommended repository setting**: enable *Automatically delete head branches* (`delete_branch_on_merge: true`) so GitHub deletes the merged branch itself; the cloud GitHub proxy rejects branch deletion from a session. See SDD-14 §3.7.
+- Merge using **Rebase & Merge** to maintain a linear commit history (manual, local only; `gh pr` subcommands use GraphQL, which cloud sessions reject):
   ```bash
   gh pr merge <id> --rebase --delete-branch
   ```

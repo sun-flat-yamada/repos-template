@@ -30,6 +30,7 @@ Manifest: `.agents/upstream/github-copilot-dashboard.json`
 | `.agents/skills/change-dev/SKILL.md` | `.agents/skills/change-dev/SKILL.md` |
 | `.agents/rules/development-workflow.md` | `.agents/rules/workflow-rules-development.md` |
 | `scripts/worktree-manage.ts` | `scripts/worktree-manage.py` (Python port) |
+| `.github/ISSUE_TEMPLATE/work_unit.yml` | `.github/ISSUE_TEMPLATE/work-unit.yml` (language-neutral gate, kebab-case name) |
 
 Manifest: `.agents/upstream/claude-audit-dashboard.json` ([`sun-flat-yamada/claude-audit-dashboard`](https://github.com/sun-flat-yamada/claude-audit-dashboard))
 
@@ -46,6 +47,8 @@ Not adopted on purpose:
 
 Local divergences from upstream:
 - Upstream pushes with a plain `--force-with-lease`. Here only `git push --force-with-lease=<branch>:<sha> --force-if-includes origin <branch>` is allowed, as a C-HITL-01 approval on a non-protected feature branch (ADR-0002); a bare lease, a lease without `<sha>` or `--force-if-includes`, `--force`, and `-f` stay denied (N-05).
+- The plan **Proceed** gate always applies and PRs are always opened as drafts. Upstream skips the plan wait and opens ready-for-review PRs when Auto-Pilot is on; here Auto-Pilot cannot merge (N-08), so the human review stays the gate.
+- Not adopted yet: the npm helpers (`change-dev:plan-check`, `change-dev:branch`, `change-dev:finish`, `change-dev:mode`), the `<type>/<issue>-<slug>` branch rule with the cloud branch rename, and the precedence rule over cloud session defaults (`instructions-rules-precedence.md`). They are planned as Python ports and a rule of their own.
 - Auto-Pilot is adopted as-is, but `CHG_DEV_AUTO_PILOT` is **disabled by default** (`.env.example` sets `false`; upstream sets `true`). Its approve / merge steps stay denied by the permission guard (N-08).
 
 ## Periodic Update Procedure

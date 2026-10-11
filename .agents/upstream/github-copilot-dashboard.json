@@ -1,6 +1,6 @@
 {
   "repo": "https://github.com/sun-flat-yamada/github-copilot-dashboard",
-  "synced_commit": "c28322a8656ecd6863ef31d5e230121a8b2edf15",
+  "synced_commit": "59c96f6d781b276dfa13dd81b9944c9bc82b52a6",
   "files": [
     {
       "source": ".agents/change-dev.agent.md",
@@ -17,6 +17,10 @@
     {
       "source": "scripts/worktree-manage.ts",
       "adapted": "scripts/worktree-manage.py"
+    },
+    {
+      "source": ".github/ISSUE_TEMPLATE/work_unit.yml",
+      "adapted": ".github/ISSUE_TEMPLATE/work-unit.yml"
     }
   ]
 }
