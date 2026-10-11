@@ -1,0 +1,57 @@
+name: "🎫 Work Unit (change-dev task)"
+description: "One plan task = one Issue = one Pull Request. A fresh agent session starts from this Issue."
+title: "[<task-id>] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Register one task of a plan (e.g. `P1-2`) as one Issue sized for one PR. Attach it to the phase's tracking Issue as a sub-issue. See `.agents/skills/change-dev/SKILL.md` (Work-Unit Issue).
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: The problem this task solves and the finding IDs it addresses.
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+      description: Concrete changes. Name the files/modules and the decisions already made.
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done condition
+      description: The observable condition from the plan that makes this task complete.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: A checklist. Include the docs sync and the quality gate.
+      value: |
+        - [ ] 
+        - [ ] `docs/` updated where behavior changed
+        - [ ] Quality gate passes (`.agents/rules/workflow-rules-development.md` section 4)
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References and Prerequisites
+      description: Plan section, ADRs, recorded decisions, parent Issue, and the tasks/PRs that must be merged first.
+    validations:
+      required: true
+  - type: textarea
+    id: start
+    attributes:
+      label: How to start
+      description: What a new session reads first and how it starts.
+      value: |
+        Say "Resolve this Issue". Follow `.agents/skills/change-dev/SKILL.md` (Work-Unit Issue). Read `CLAUDE.md`, the plan, its recorded decisions and the references above first. Open the PR with `Closes` for this Issue.
+    validations:
+      required: true
